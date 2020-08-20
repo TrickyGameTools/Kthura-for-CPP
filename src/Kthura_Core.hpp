@@ -1,0 +1,3 @@
+#ifndef KTHURA_LOADED_CORE
+#define KTHURA_LOADED_CORE
+#endif
