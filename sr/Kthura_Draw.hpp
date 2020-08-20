@@ -1,0 +1,3 @@
+#ifndef KTHURA_LOADED_DRAW
+#define KTHURA_LOADED_DRAW
+#endif
