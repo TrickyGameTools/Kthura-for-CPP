@@ -1,0 +1,3 @@
+#ifndef KTHURA_LOADED_SDL_DRIVER
+#define KTHURA_LOADED_SDL_DRIVER
+#endif
