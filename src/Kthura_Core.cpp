@@ -28,6 +28,8 @@
 #include "Kthura_Draw.hpp"
 
 namespace NSKthura{
+    const double Pi = 3.141593;
+
     float KthuraObject::TrueScaleX() { return (float)ScaleX / 1000; }
     float KthuraObject::TrueScaleY() { return (float)ScaleY / 1000; }
     std::string KthuraObject::Kind() {
@@ -72,6 +74,30 @@ namespace NSKthura{
         _impassible = imp;
         if (Kthura::AutoMap) parent->BuildBlockMap();
     }
+    bool KthuraObject::Imapassible() {
+        return _impassible;
+    }
+
+    void KthuraObject::RotationRadians(double value) {
+        _rotrad = value;
+        _rotdeg = (int)(value * (180 / Pi));
+    }
+
+    double KthuraObject::RotationRadians() {
+        return   _rotrad;
+    }
+
+    void KthuraObject::RotationDegrees(int value) {
+        _rotdeg = value;
+        _rotrad = (double)(((double)value) * (180 / Pi));
+    }
+
+
+    int KthuraObject::RotationDegrees() {
+        return _rotdeg;
+    }
+
+    
     KthuraObject KthuraObject::Create(std::string Kind,KthuraLayer* p) {
         KthuraObject ret;
         ret._Kind = Kind;

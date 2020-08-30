@@ -29,7 +29,7 @@ namespace NSKthura{
 	
 	class Kthura;
 	class KthuraLayer;
-	class Kthura;
+	class KthuraObject;
 	
 	class KthuraObject {
 	private:
@@ -43,6 +43,8 @@ namespace NSKthura{
 		bool _impassible = false;
 		bool _forcepassible = false;
 		std::string _Kind;
+		double _rotrad = 0;
+		int _rotdeg = 0;
 	public:
 		std::map<std::string, std::string> MetaData;
 		std::string Texture = "";
@@ -67,7 +69,12 @@ namespace NSKthura{
 		void Labels(std::string nl);
 		std::string Labels();
 		void Impassible(bool imp);
-		static KthuraObject Create(std::string Kind,KthuraLayer* p);
+		bool Imapassible();
+		void RotationRadians(double value);
+		double RotationRadians();
+		void RotationDegrees(int value);
+		int RotationDegrees(); 
+		static 	KthuraObject Create(std::string Kind,KthuraLayer* p);
 	};
 	
 	class KthuraLayer{
