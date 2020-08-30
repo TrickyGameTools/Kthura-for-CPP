@@ -22,4 +22,6 @@
 
 namespace NSKthura {
 	KthuraDraw* KthuraDraw::DrawDriver=NULL;
+	static void EmptyZoneFunction(KthuraObject* obj, int ix, int iy, int scrollx, int scrolly) {}
+	DelDrawZone KthuraDraw::DrawZone = EmptyZoneFunction;
 }

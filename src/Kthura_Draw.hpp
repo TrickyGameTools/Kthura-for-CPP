@@ -26,8 +26,8 @@ namespace NSKthura {
 
     class KthuraDraw;
 
-    typedef void (*DelDrawZone)(KthuraObject obj, int ix , int iy , int scrollx , int scrolly );//, int ix = 0, int iy = 0, int scrollx = 0, int scrolly = 0);
-    typedef void (*DelDrawPoint)(KthuraObject obj, int ix , int iy , int scrollx , int scrolly );//int ix = 0, int iy = 0, int scrollx = 0, int scrolly = 0);
+    typedef void (*DelDrawZone)(KthuraObject* obj, int ix , int iy , int scrollx , int scrolly );//, int ix = 0, int iy = 0, int scrollx = 0, int scrolly = 0);
+    typedef void (*DelDrawPoint)(KthuraObject* obj, int ix , int iy , int scrollx , int scrolly );//int ix = 0, int iy = 0, int scrollx = 0, int scrolly = 0);
 
     class KthuraDraw {
     public:
@@ -45,8 +45,8 @@ namespace NSKthura {
 
         //        #region Some static functions for Kthura's functionality in general
         static KthuraDraw* DrawDriver;
+            static DelDrawZone DrawZone; // Normally zones should be ignored! Only editors should use this, and thus this delegate!
         /* MARKER
-            static public DelDrawZone DrawZone = delegate{ }; // Normally zones should be ignored! Only editors should use this, and thus this delegate!
             static public DelDrawPoint DrawPivot = null; // Only needed in editors
             static public DelDrawPoint DrawExit = null;
             static public DelDrawPoint DrawCSpot = null;
