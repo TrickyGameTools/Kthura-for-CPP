@@ -17,4 +17,9 @@
 // misrepresented as being the original software.
 // 3. This notice may not be removed or altered from any source distribution.
 // EndLic
-// TODO: Write Code
+
+#include "Kthura_Draw.hpp"
+
+namespace NSKthura {
+	KthuraDraw* KthuraDraw::DrawDriver=NULL;
+}

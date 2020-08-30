@@ -24,6 +24,8 @@
 
 namespace NSKthura {
 
+    class KthuraDraw;
+
     typedef void (*DelDrawZone)(KthuraObject obj, int ix , int iy , int scrollx , int scrolly );//, int ix = 0, int iy = 0, int scrollx = 0, int scrolly = 0);
     typedef void (*DelDrawPoint)(KthuraObject obj, int ix , int iy , int scrollx , int scrolly );//int ix = 0, int iy = 0, int scrollx = 0, int scrolly = 0);
 
@@ -33,17 +35,17 @@ namespace NSKthura {
         virtual void DrawTiledArea(KthuraObject* obj, int ix = 0, int iy = 0, int scrollx = 0, int scrolly = 0) = 0;
         virtual void DrawObstacle(KthuraObject* obj, int ix = 0, int iy = 0, int scrollx = 0, int scrolly = 0) = 0;
         virtual void DrawActor(KthuraActor* obj, int ix = 0, int iy = 0, int scrollx = 0, int scrolly = 0) = 0;
-            virtual void DrawPic(KthuraObject* obj, int ix = 0, int iy = 0, int scrollx = 0, int scrolly = 0)=0;
-            virtual void DrawStretchedArea(KthuraObject* obj, int ix = 0, int iy = 0, int scrollx = 0, int scrolly = 0)=0;
-            virtual void AnimReset(KthuraObject* obj)=0;
-            virtual int ObjectWidth(KthuraObject* obj)=0;
-            virtual int ObjectHeight(KthuraObject* obj)=0;
-            virtual bool HasTexture(KthuraObject* obj)=0;
-        /* MARKER
-            #endregion
+        virtual void DrawPic(KthuraObject* obj, int ix = 0, int iy = 0, int scrollx = 0, int scrolly = 0) = 0;
+        virtual void DrawStretchedArea(KthuraObject* obj, int ix = 0, int iy = 0, int scrollx = 0, int scrolly = 0) = 0;
+        virtual void AnimReset(KthuraObject* obj) = 0;
+        virtual int ObjectWidth(KthuraObject* obj) = 0;
+        virtual int ObjectHeight(KthuraObject* obj) = 0;
+        virtual bool HasTexture(KthuraObject* obj) = 0;
+        // #endregion
 
-                #region Some static functions for Kthura's functionality in general
-                static public KthuraDraw DrawDriver = null;
+        //        #region Some static functions for Kthura's functionality in general
+        static KthuraDraw* DrawDriver;
+        /* MARKER
             static public DelDrawZone DrawZone = delegate{ }; // Normally zones should be ignored! Only editors should use this, and thus this delegate!
             static public DelDrawPoint DrawPivot = null; // Only needed in editors
             static public DelDrawPoint DrawExit = null;
