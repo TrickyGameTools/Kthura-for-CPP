@@ -2,7 +2,7 @@
 // src/Kthura_SDL_Driver.hpp
 // Kthura - Driver to make Kthura use SDL (header)
 // version: 20.08.30
-// Copyright (C) Kthura - Driver to make Kthura use SDL (header) Jeroen P. Broks
+// Copyright (C) 2020 Jeroen P. Broks
 // This software is provided 'as-is', without any express or implied
 // warranty.  In no event will the authors be held liable for any damages
 // arising from the use of this software.
