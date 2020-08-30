@@ -34,7 +34,8 @@ namespace NSKthura{
 	class KthuraObject {
 	private:
 		KthuraLayer* parent;
-		int cnt = 0;
+		//int cnt = 0;
+		int _id = 0;
 		int _x = 0, _y = 0;
 		int AnimFrameSkip = 0;
 		int _Dominance = 20;
@@ -45,6 +46,8 @@ namespace NSKthura{
 		std::string _Kind;
 		double _rotrad = 0;
 		int _rotdeg = 0;
+		int _alpha1000 = 0;
+		int _alpha255 = 0;
 	public:
 		std::map<std::string, std::string> MetaData;
 		std::string Texture = "";
@@ -70,22 +73,41 @@ namespace NSKthura{
 		std::string Labels();
 		void Impassible(bool imp);
 		bool Imapassible();
+		void ForcePassible(bool fp);
+		bool ForcePassible();
 		void RotationRadians(double value);
 		double RotationRadians();
 		void RotationDegrees(int value);
 		int RotationDegrees(); 
+		void Alpha255(int value);
+		int Alpha255();
+		int ID();
+
+		/// <summary>
+		/// Sets the alpha in a 0-1000 scale. Please note that this was a leftover from the very original BlitzMax version of Kthura. That version is discontinued and all systems I used later use the official 0-255 scale. Therefore the use of the 1-1000 scale has been deprecated, and I strongly recommend to use Alpha255 in stead!
+		/// </summary>
+		/// <param name="value"></param>
+		void Alpha1000(int value);			
+		/// <summary>
+		/// Deprecated! Use Alpha255 in stead.
+		/// </summary>
+		int Alpha1000();
 		static 	KthuraObject Create(std::string Kind,KthuraLayer* p);
+		bool CheckParent(KthuraLayer* p);
 	};
 	
 	class KthuraLayer{
 	private:
 		Kthura* parent;
 		std::map<std::string, KthuraObject*> _TagMap;
-		std::map<std::string, std::vector<KthuraObject*>> _LayerMap;
+		std::map<std::string, std::vector<KthuraObject*>> _LabelMap;		
 		std::vector<bool> _BlockMap;
+		std::map<int, KthuraObject*> ID_Map;
 		int BM_W = 0;
 		int BM_H = 0;
+		int idinc = 0;
 	public:
+		int nextID();
 		int GridX{ 32 };
 		int GridY{ 32 };
 		std::vector<KthuraObject> Objects;
@@ -100,8 +122,12 @@ namespace NSKthura{
 		void RemapTags();
 		void RemapLabels();
 		void BuildBlockMap();
+		void RemapID();
 		void TotalRemap();
 		void NewObject(std::string Kind);
+		void Kill(KthuraObject* O);
+		void Kill(int ID);
+		void Kill(std::string Tag);
 	};
 	
 	class Kthura {

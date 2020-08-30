@@ -78,6 +78,15 @@ namespace NSKthura{
         return _impassible;
     }
 
+    void KthuraObject::ForcePassible(bool fp) {
+        _forcepassible = fp;
+        if (Kthura::AutoMap) parent->BuildBlockMap();
+    }
+
+    bool KthuraObject::ForcePassible() {
+        return _forcepassible;
+    }
+
     void KthuraObject::RotationRadians(double value) {
         _rotrad = value;
         _rotdeg = (int)(value * (180 / Pi));
@@ -97,12 +106,52 @@ namespace NSKthura{
         return _rotdeg;
     }
 
+    void KthuraObject::Alpha255(int value)         {
+            _alpha255 = value;
+            if (_alpha255 < 0) _alpha255 = 0;
+            if (_alpha255 > 255) _alpha255 = 255;
+            _alpha1000 = (int)((float)(((float)value / (float)255) * (float)1000));
+            if (_alpha1000 < 0) _alpha1000 = 0;
+            if (_alpha1000 > 1000) _alpha1000 = 1000;
+            //Debug.WriteLine($"Alpha255 set. 1000={Alpha1000}; 255={Alpha255};");
+        }
+
+    int KthuraObject::Alpha255() {
+        return _alpha255;
+    }
+
+    int KthuraObject::ID() {
+        return _id;
+    }
+
+    void KthuraObject::Alpha1000(int value)				 {
+        _alpha1000 = value;
+        if (_alpha1000 < 0) _alpha1000 = 0;
+        if (_alpha1000 > 1000) _alpha1000 = 1000;
+        _alpha255 = (int)((float)(((float)value / 1000) * 255));
+        if (_alpha255 < 0) _alpha255 = 0;
+        if (_alpha255 > 255) _alpha255 = 255;
+        //Debug.WriteLine($"Alpha1000 set. 1000={Alpha1000}; 255={Alpha255};"); // Yeah, I just imported this from C#, mind you!
+    }
+
+
     
+    int KthuraObject::Alpha1000() {
+        return _alpha1000;
+    }
+
     KthuraObject KthuraObject::Create(std::string Kind,KthuraLayer* p) {
         KthuraObject ret;
         ret._Kind = Kind;
         ret.parent = p;
+        ret._id = p->nextID();
         return ret;
+    }
+    bool KthuraObject::CheckParent(KthuraLayer* p) {
+        return parent==p; // Should compare the memory addresses... not the values stored in them!
+    }
+    int KthuraLayer::nextID() {        
+        return idinc++; // dirty code!
     }
     KthuraObject* KthuraLayer::TagMap(std::string Tag) {
         if (_TagMap.count(Tag)) return _TagMap[Tag];
@@ -155,6 +204,13 @@ namespace NSKthura{
     void KthuraLayer::BuildBlockMap() {
     }
 
+    void KthuraLayer::RemapID() {
+        ID_Map.clear();
+        for (auto& Obj : Objects) {
+            ID_Map[Obj.ID()] = &Obj;
+        }
+    }
+
     void KthuraLayer::TotalRemap() {
         RemapDominance();
         RemapTags();
@@ -166,6 +222,28 @@ namespace NSKthura{
         Objects.push_back(KthuraObject::Create(Kind, this));
         if (Kthura::AutoMap) TotalRemap();
     }
+
+    void KthuraLayer::Kill(KthuraObject* O) {
+        int idx = -1;
+        if (!O->CheckParent(this)) { Kthura::Throw("Trying to kill an object that is not part of the requested layer!"); return; }
+        for (int i = 0; i < Objects.size(); ++i) if (&Objects[i] == O) idx = i;
+        if (idx == -1) { Kthura::Throw("Object to kill not found!"); return; }
+        O = NULL;
+        _TagMap.clear();
+        _LabelMap.clear();
+        ID_Map.clear();        
+        Objects.erase(Objects.begin() + idx);
+        if (Kthura::AutoMap) TotalRemap();
+    }
+
+    void KthuraLayer::Kill(int ID) {
+        if (ID_Map.count(ID)) Kill(ID_Map[ID]);
+    }
+
+    void KthuraLayer::Kill(std::string Tag) {
+        if (_TagMap.count(Tag)) Kill(_TagMap[Tag]);
+    }
+
 
     bool Kthura::AutoMap = true;
     void (*Kthura::Panic) (std::string err) = NULL;
