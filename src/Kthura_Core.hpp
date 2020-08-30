@@ -30,6 +30,7 @@ namespace NSKthura{
 	class Kthura;
 	class KthuraLayer;
 	class KthuraObject;
+	class KthuraActor;
 	
 	class KthuraObject {
 	private:
@@ -94,6 +95,10 @@ namespace NSKthura{
 		int Alpha1000();
 		static 	KthuraObject Create(std::string Kind,KthuraLayer* p);
 		bool CheckParent(KthuraLayer* p);
+	};
+
+	class KthuraActor :public KthuraObject {
+
 	};
 	
 	class KthuraLayer{

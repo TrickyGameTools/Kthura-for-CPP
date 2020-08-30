@@ -24,87 +24,88 @@
 
 namespace NSKthura {
 
-    delegate void DelDrawZone(KthuraObject obj, int ix = 0, int iy = 0, int scrollx = 0, int scrolly = 0);
-    delegate void DelDrawPoint(KthuraObject obj, int ix = 0, int iy = 0, int scrollx = 0, int scrolly = 0);
+    typedef void (*DelDrawZone)(KthuraObject obj, int ix , int iy , int scrollx , int scrolly );//, int ix = 0, int iy = 0, int scrollx = 0, int scrolly = 0);
+    typedef void (*DelDrawPoint)(KthuraObject obj, int ix , int iy , int scrollx , int scrolly );//int ix = 0, int iy = 0, int scrollx = 0, int scrolly = 0);
 
+    class KthuraDraw {
+    public:
+        // #region The Abstract part every Draw Driver must have!
+        virtual void DrawTiledArea(KthuraObject* obj, int ix = 0, int iy = 0, int scrollx = 0, int scrolly = 0) = 0;
+        virtual void DrawObstacle(KthuraObject* obj, int ix = 0, int iy = 0, int scrollx = 0, int scrolly = 0) = 0;
+        virtual void DrawActor(KthuraActor* obj, int ix = 0, int iy = 0, int scrollx = 0, int scrolly = 0) = 0;
+            virtual void DrawPic(KthuraObject* obj, int ix = 0, int iy = 0, int scrollx = 0, int scrolly = 0)=0;
+            virtual void DrawStretchedArea(KthuraObject* obj, int ix = 0, int iy = 0, int scrollx = 0, int scrolly = 0)=0;
+            virtual void AnimReset(KthuraObject* obj)=0;
+            virtual int ObjectWidth(KthuraObject* obj)=0;
+            virtual int ObjectHeight(KthuraObject* obj)=0;
+            virtual bool HasTexture(KthuraObject* obj)=0;
+        /* MARKER
+            #endregion
 
-    abstract class KthuraDraw {
-        #region The Abstract part every Draw Driver must have!
-            abstract public void DrawTiledArea(KthuraObject obj, int ix = 0, int iy = 0, int scrollx = 0, int scrolly = 0);
-        abstract public void DrawObstacle(KthuraObject obj, int ix = 0, int iy = 0, int scrollx = 0, int scrolly = 0);
-        abstract public void DrawActor(KthuraActor obj, int ix = 0, int iy = 0, int scrollx = 0, int scrolly = 0);
-        abstract public void DrawPic(KthuraObject obj, int ix = 0, int iy = 0, int scrollx = 0, int scrolly = 0);
-        abstract public void DrawStretchedArea(KthuraObject obj, int ix = 0, int iy = 0, int scrollx = 0, int scrolly = 0);
-        abstract public void AnimReset(KthuraObject obj);
-        abstract public int ObjectWidth(KthuraObject obj);
-        abstract public int ObjectHeight(KthuraObject obj);
-        abstract public bool HasTexture(KthuraObject obj);
-        #endregion
+                #region Some static functions for Kthura's functionality in general
+                static public KthuraDraw DrawDriver = null;
+            static public DelDrawZone DrawZone = delegate{ }; // Normally zones should be ignored! Only editors should use this, and thus this delegate!
+            static public DelDrawPoint DrawPivot = null; // Only needed in editors
+            static public DelDrawPoint DrawExit = null;
+            static public DelDrawPoint DrawCSpot = null;
+            static public bool IgnoreVisibility = false; // If set to true, invisible objects will still be shown.
 
-            #region Some static functions for Kthura's functionality in general
-            static public KthuraDraw DrawDriver = null;
-        static public DelDrawZone DrawZone = delegate{ }; // Normally zones should be ignored! Only editors should use this, and thus this delegate!
-        static public DelDrawPoint DrawPivot = null; // Only needed in editors
-        static public DelDrawPoint DrawExit = null;
-        static public DelDrawPoint DrawCSpot = null;
-        static public bool IgnoreVisibility = false; // If set to true, invisible objects will still be shown.
-
-        static public void DrawMap(Kthura map, string layer, int scrollx = 0, int scrolly = 0, int x = 0, int y = 0) = > DrawMap(map.Layers[layer], scrollx, scrolly, x, y);
-        static public void DrawMap(KthuraLayer layer, int scrollx = 0, int scrolly = 0, int x = 0, int y = 0) {
-            bool AutoRemapOnHold = Kthura.automap;
-            bool actorsmoved = false;
-            Kthura.automap = false;
-            if (layer.ObjectDrawOrder == null) layer.RemapDominance();
-            foreach(KthuraObject obj in layer.ObjectDrawOrder) {
-                if (obj.Visible || IgnoreVisibility) {
-                    if (true) { // This looks useless now, but this routine will be used later in optimalisation to see if an object is actually on screen, and if not, ignore it.                        
-                        switch (obj.kind) {
-                        case "TiledArea":
-                            obj.Animate(DrawDriver.AnimReset);
-                            if (DrawDriver != null) DrawDriver.DrawTiledArea(obj, x, y, scrollx, scrolly);
-                            break;
-                        case "StretchedArea":
-                            obj.Animate(DrawDriver.AnimReset);
-                            if (DrawDriver != null) DrawDriver.DrawStretchedArea(obj, x, y, scrollx, scrolly);
-                            break;
-                        case "Obstacle":
-                            obj.Animate(DrawDriver.AnimReset);
-                            //KthuraEdit.Stages.DBG.Log($"Animation frame for Obstacle {obj.Tag}: {obj.AnimFrame}"); // Must be on comment if not debugging the standard editor or no compile-o!
-                            if (DrawDriver != null) DrawDriver.DrawObstacle(obj, x, y, scrollx, scrolly);
-                            break;
-                        case "Pic":
-                            obj.Animate(DrawDriver.AnimReset);
-                            if (DrawDriver != null) DrawDriver.DrawPic(obj, x, y, scrollx, scrolly);
-                            break;
-                        case "Actor": {
-                            int oldx = x;
-                            int oldy = y;
-                            if (DrawDriver != null) DrawDriver.DrawActor((KthuraActor)obj, x, y, scrollx, scrolly);
-                            actorsmoved = actorsmoved || oldx != x || oldy != y;
-                            break;
-                        }
-                        case "Zone": DrawZone(obj, x, y, scrollx, scrolly); break;
-                        case "Pivot":
-                            DrawPivot ? .Invoke(obj, x, y, scrollx, scrolly); break;
-                        case "Exit":
-                            DrawExit ? .Invoke(obj, x, y, scrollx, scrolly); break;
-                        default:
-                            if (qstr.Prefixed(obj.kind, "$")) {
-                                DrawCSpot ? .Invoke(obj, x, y, scrollx, scrolly); break;
-                            } else {
-                                throw new Exception($"Unknown drawing object kind: {obj.kind}");
+            static public void DrawMap(Kthura map, string layer, int scrollx = 0, int scrolly = 0, int x = 0, int y = 0) = > DrawMap(map.Layers[layer], scrollx, scrolly, x, y);
+            static public void DrawMap(KthuraLayer layer, int scrollx = 0, int scrolly = 0, int x = 0, int y = 0) {
+                bool AutoRemapOnHold = Kthura.automap;
+                bool actorsmoved = false;
+                Kthura.automap = false;
+                if (layer.ObjectDrawOrder == null) layer.RemapDominance();
+                foreach(KthuraObject obj in layer.ObjectDrawOrder) {
+                    if (obj.Visible || IgnoreVisibility) {
+                        if (true) { // This looks useless now, but this routine will be used later in optimalisation to see if an object is actually on screen, and if not, ignore it.
+                            switch (obj.kind) {
+                            case "TiledArea":
+                                obj.Animate(DrawDriver.AnimReset);
+                                if (DrawDriver != null) DrawDriver.DrawTiledArea(obj, x, y, scrollx, scrolly);
+                                break;
+                            case "StretchedArea":
+                                obj.Animate(DrawDriver.AnimReset);
+                                if (DrawDriver != null) DrawDriver.DrawStretchedArea(obj, x, y, scrollx, scrolly);
+                                break;
+                            case "Obstacle":
+                                obj.Animate(DrawDriver.AnimReset);
+                                //KthuraEdit.Stages.DBG.Log($"Animation frame for Obstacle {obj.Tag}: {obj.AnimFrame}"); // Must be on comment if not debugging the standard editor or no compile-o!
+                                if (DrawDriver != null) DrawDriver.DrawObstacle(obj, x, y, scrollx, scrolly);
+                                break;
+                            case "Pic":
+                                obj.Animate(DrawDriver.AnimReset);
+                                if (DrawDriver != null) DrawDriver.DrawPic(obj, x, y, scrollx, scrolly);
+                                break;
+                            case "Actor": {
+                                int oldx = x;
+                                int oldy = y;
+                                if (DrawDriver != null) DrawDriver.DrawActor((KthuraActor)obj, x, y, scrollx, scrolly);
+                                actorsmoved = actorsmoved || oldx != x || oldy != y;
+                                break;
                             }
-                            //break;
+                            case "Zone": DrawZone(obj, x, y, scrollx, scrolly); break;
+                            case "Pivot":
+                                DrawPivot ? .Invoke(obj, x, y, scrollx, scrolly); break;
+                            case "Exit":
+                                DrawExit ? .Invoke(obj, x, y, scrollx, scrolly); break;
+                            default:
+                                if (qstr.Prefixed(obj.kind, "$")) {
+                                    DrawCSpot ? .Invoke(obj, x, y, scrollx, scrolly); break;
+                                } else {
+                                    throw new Exception($"Unknown drawing object kind: {obj.kind}");
+                                }
+                                //break;
+                            }
                         }
                     }
                 }
+                // Restore Automap
+                Kthura.automap = AutoRemapOnHold;
+                if (Kthura.automap && actorsmoved) layer.TotalRemap(); // If actors have moved, make sure remapping is done
             }
-            // Restore Automap
-            Kthura.automap = AutoRemapOnHold;
-            if (Kthura.automap && actorsmoved) layer.TotalRemap(); // If actors have moved, make sure remapping is done
-        }
-        #endregion
-    }
-
+            #endregion
+        //THE END OF THE STUFF*/
+    };
 
 #endif
