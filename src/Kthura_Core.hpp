@@ -28,6 +28,9 @@
 // Requires Tricky's Units!
 #include <QuickString.hpp>
 
+// JCR6 is needed for loading. Kthura files are just JCR6 files after all
+#include <jcr6_core.hpp>
+
 namespace NSKthura{
 	
 	enum class KthuraKind { Unknown, Zone, TiledArea, StretchedArea, Obstacle, Pic, Actor, CustomItem, Pivot, Exit };
@@ -69,6 +72,7 @@ namespace NSKthura{
 		float TrueScaleX();
 		float TrueScaleY();
 		std::string Kind();
+		void Kind(std::string k,bool force=false); // Only works when kind is not yet defined! Otherwise this request will be ignored!
 		KthuraKind EKind();
 		void X(int newx);
 		int X();
@@ -131,6 +135,7 @@ namespace NSKthura{
 		KthuraObject* TagMap(std::string Tag);
 		std::map<std::string, KthuraObject*> _DomMap; // not to be documented!
 		std::vector<KthuraObject*>* LabelMap(std::string label);
+		KthuraObject* LastObject();
 		
 		bool HasTag(std::string Tag);
 		bool Blocked(int x, int y);
@@ -154,17 +159,24 @@ namespace NSKthura{
 		///<summary>NEVER, and I repeat NEVER address the Layers map directly unless you know what you are doing!</summary>
 		std::map<std::string, KthuraLayer> Layers;
 		std::map<std::string, std::string> MetaData;
+		jcr6::JT_Dir& TexDir;
 		KthuraLayer* Layer(std::string lay);
 		void NewLayer(std::string lay, bool force = false);
 		void KillLayer(std::string lay);
 		void KillAllLayers();
 		void KillMap();
+		void Load(jcr6::JT_Dir& JCR, std::string Prefix = "");
+		void Load(std::string JCR, std::string Prefix = "");
 		static void Throw(std::string err);
 		/// <summary>
 		/// Should Kthura have an error, this function will be executed *if* it's been defined. If it's not defined it will merely put a message on the console. 
 		/// </summary>
 		static void (*Panic)(std::string msg);
 		static bool AutoMap;
+		/// <summary>
+		/// When set to false, instructions in mapfiles not understood will be ignored. Other wise errors will be reported based on the panic setting!
+		/// </summary>
+		static bool StrictLoad;
 	};
 	
 }
