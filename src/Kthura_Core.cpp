@@ -28,6 +28,7 @@
 #include "Kthura_Draw.hpp"
 
 namespace NSKthura {
+    using namespace TrickyUnits;
     const double Pi = 3.141593;
 
     static std::map<std::string, KthuraKind> InitMapKind() {
@@ -297,9 +298,55 @@ namespace NSKthura {
         if (_TagMap.count(Tag)) Kill(_TagMap[Tag]);
     }
 
+    void KthuraLayer::KillAllObjects() {
+        _TagMap.clear();
+        ID_Map.clear();
+        _LabelMap.clear();
+        _BlockMap.clear();
+        Objects.clear();
+        TotalRemap(); // Just an extra safety pre-caution.
+    }
+
+    
+
 
     bool Kthura::AutoMap = true;
     void (*Kthura::Panic) (std::string err) = NULL;
+    KthuraLayer* Kthura::Layer(std::string lay) {
+        lay = Upper(lay);
+        if (!Layers.count(lay)) { Throw("No layer called \"" + lay + "\" found!"); return NULL; }
+        return &Layers[lay];
+    }
+    void Kthura::NewLayer(std::string lay, bool force) {
+        lay = Upper(lay);
+        if (Layers.count(lay)) {
+            if (force) 
+                KillLayer(lay);
+            else {
+                Throw("Layer named \"" + lay + "\" already exists!");
+                return;
+            }
+        }
+        Layers[lay].TotalRemap();
+    }
+    void Kthura::KillLayer(std::string lay) {
+        if (!Layers.count(TrickyUnits::Upper(lay))) return;
+        Layers[TrickyUnits::Upper(lay)].KillAllObjects();
+        Layers.erase(TrickyUnits::Upper(lay));
+    }
+
+    void Kthura::KillAllLayers() {
+        for (auto& l : Layers) {
+            l.second.KillAllObjects();
+        }
+        Layers.clear();
+    }
+
+    void Kthura::KillMap() {
+        KillAllLayers();
+        MetaData.clear();
+    }
+
     void Kthura::Throw(std::string err) {
         if (Kthura::Panic != NULL) {
             Kthura::Panic(err);
@@ -307,4 +354,8 @@ namespace NSKthura {
             std::cout << "\x7KTHURA ERROR!\n" << err << "\n\n";
         }
     }
+
+
+    
+
 }

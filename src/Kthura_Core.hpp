@@ -25,6 +25,9 @@
 #include <map>
 #include <vector>
 
+// Requires Tricky's Units!
+#include <QuickString.hpp>
+
 namespace NSKthura{
 	
 	enum class KthuraKind { Unknown, Zone, TiledArea, StretchedArea, Obstacle, Pic, Actor, CustomItem, Pivot, Exit };
@@ -142,13 +145,20 @@ namespace NSKthura{
 		void Kill(KthuraObject* O);
 		void Kill(int ID);
 		void Kill(std::string Tag);
+		void KillAllObjects();
 	};
 	
 	class Kthura {
 	private:
 	public:
+		///<summary>NEVER, and I repeat NEVER address the Layers map directly unless you know what you are doing!</summary>
 		std::map<std::string, KthuraLayer> Layers;
 		std::map<std::string, std::string> MetaData;
+		KthuraLayer* Layer(std::string lay);
+		void NewLayer(std::string lay, bool force = false);
+		void KillLayer(std::string lay);
+		void KillAllLayers();
+		void KillMap();
 		static void Throw(std::string err);
 		/// <summary>
 		/// Should Kthura have an error, this function will be executed *if* it's been defined. If it's not defined it will merely put a message on the console. 
