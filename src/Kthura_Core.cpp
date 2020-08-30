@@ -27,14 +27,34 @@
 #include "Kthura_Core.hpp"
 #include "Kthura_Draw.hpp"
 
-namespace NSKthura{
+namespace NSKthura {
     const double Pi = 3.141593;
+
+    static std::map<std::string, KthuraKind> InitMapKind() {
+        std::map<std::string, KthuraKind> ret;
+        ret["Zone"] = KthuraKind::Zone;
+        ret["TiledArea"] = KthuraKind::TiledArea;
+        ret["StretchedArea"] = KthuraKind::StretchedArea;
+        ret["Obstacle"] = KthuraKind::Obstacle;
+        ret["Pic"] = KthuraKind::Pic;
+        ret["Pivot"] = KthuraKind::Pivot;
+        ret["Exit"] = KthuraKind::Exit;
+        return ret;
+    }
+    static std::map<std::string, KthuraKind> MapKind = InitMapKind();
+
 
     float KthuraObject::TrueScaleX() { return (float)ScaleX / 1000; }
     float KthuraObject::TrueScaleY() { return (float)ScaleY / 1000; }
     std::string KthuraObject::Kind() {
         return _Kind;
     }
+    KthuraKind KthuraObject::EKind() {
+        if (_Kind[0] == '$') return KthuraKind::CustomItem;
+        if (!MapKind.count(_Kind)) return KthuraKind::Unknown; // Possible when using maps from later versions, and all.
+        return MapKind[_Kind];
+    }
+
     void KthuraObject::X(int newx) {
         _x = newx;
         if (Kthura::AutoMap) parent->RemapDominance();
@@ -106,15 +126,15 @@ namespace NSKthura{
         return _rotdeg;
     }
 
-    void KthuraObject::Alpha255(int value)         {
-            _alpha255 = value;
-            if (_alpha255 < 0) _alpha255 = 0;
-            if (_alpha255 > 255) _alpha255 = 255;
-            _alpha1000 = (int)((float)(((float)value / (float)255) * (float)1000));
-            if (_alpha1000 < 0) _alpha1000 = 0;
-            if (_alpha1000 > 1000) _alpha1000 = 1000;
-            //Debug.WriteLine($"Alpha255 set. 1000={Alpha1000}; 255={Alpha255};");
-        }
+    void KthuraObject::Alpha255(int value) {
+        _alpha255 = value;
+        if (_alpha255 < 0) _alpha255 = 0;
+        if (_alpha255 > 255) _alpha255 = 255;
+        _alpha1000 = (int)((float)(((float)value / (float)255) * (float)1000));
+        if (_alpha1000 < 0) _alpha1000 = 0;
+        if (_alpha1000 > 1000) _alpha1000 = 1000;
+        //Debug.WriteLine($"Alpha255 set. 1000={Alpha1000}; 255={Alpha255};");
+    }
 
     int KthuraObject::Alpha255() {
         return _alpha255;
@@ -123,6 +143,28 @@ namespace NSKthura{
     int KthuraObject::ID() {
         return _id;
     }
+
+    void KthuraObject::Animate(KthuraAnimReset RESET) {
+        auto kind = Kind(); // Lazy! I don't you tot ell me!
+        if (kind != "Obstacle" && kind != "Pic" && kind != "TiledArea" && kind != "StrechedArea") return;
+        if (AnimSpeed < 0) return;
+        AnimFrameSkip++;
+        if (AnimFrameSkip >= AnimSpeed) {
+            AnimFrameSkip = 0;
+            AnimFrame++;
+            // Please note that the core can NEVER know what driver is loaded. This feature should take care of that!
+            if (RESET) RESET(this);
+        }
+    }
+
+    bool KthuraObject::IsInZone(std::string ztag) {
+        if (!parent->HasTag(ztag)) return false;
+        auto zone = parent->TagMap(ztag);
+        if (Kind() != "Obstacle" && Kind() != "Actor") Kthura::Throw("KthuraMap.Object.IsInzone(\"" + ztag + "\"): Main Object must be either Object or Actor");
+        if (zone->Kind() != "TiledArea" && zone->Kind() != "Zone") Kthura::Throw("KthuraMap.Object.IsInzone\"" + ztag + "\"): Zone Object must be either Zone or TiledArea");
+        return X() >= zone->X() && Y() >= zone->Y() && X() <= zone->X() + zone->w && Y() <= zone->Y() + zone->h;
+    }
+
 
     void KthuraObject::Alpha1000(int value)				 {
         _alpha1000 = value;
@@ -153,15 +195,26 @@ namespace NSKthura{
     int KthuraLayer::nextID() {        
         return idinc++; // dirty code!
     }
+    std::map<int, KthuraObject*> KthuraLayer::GetIDMap() {
+        if (ID_Map.size() == 0) {
+            RemapDominance();
+            RemapID();
+        }
+        return ID_Map;
+    }
     KthuraObject* KthuraLayer::TagMap(std::string Tag) {
         if (_TagMap.count(Tag)) return _TagMap[Tag];
         Kthura::Throw("There is no object tagged: " + Tag);
         return nullptr;
     }
 
-    std::vector<KthuraObject*>* KthuraLayer::LayerMap(std::string label) {
-        if (_LayerMap.count(label)) return &_LayerMap[label];
+    std::vector<KthuraObject*>* KthuraLayer::LabelMap(std::string label) {
+        if (_LabelMap.count(label)) return &_LabelMap[label];
         return &std::vector<KthuraObject*>();
+    }
+
+    bool NSKthura::KthuraLayer::HasTag(std::string Tag) {
+        return _TagMap.count(Tag);
     }
 
     bool KthuraLayer::Blocked(int x, int y) {
@@ -194,10 +247,10 @@ namespace NSKthura{
     }
 
     void KthuraLayer::RemapLabels() {
-        _LayerMap.clear();
+        _LabelMap.clear();
         for (auto& Obj : Objects) {
             auto labels = TrickyUnits::Split(Obj.Labels(), ',');
-            for (auto label : labels) _LayerMap[label].push_back(&Obj);
+            for (auto label : labels) _LabelMap[label].push_back(&Obj);
         }
     }
 

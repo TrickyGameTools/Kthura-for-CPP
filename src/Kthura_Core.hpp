@@ -27,10 +27,14 @@
 
 namespace NSKthura{
 	
+	enum class KthuraKind { Unknown, Zone, TiledArea, StretchedArea, Obstacle, Pic, Actor, CustomItem, Pivot, Exit };
+
 	class Kthura;
 	class KthuraLayer;
 	class KthuraObject;
 	class KthuraActor;
+	
+	typedef void (*KthuraAnimReset)(KthuraObject* O);
 	
 	class KthuraObject {
 	private:
@@ -62,6 +66,7 @@ namespace NSKthura{
 		float TrueScaleX();
 		float TrueScaleY();
 		std::string Kind();
+		KthuraKind EKind();
 		void X(int newx);
 		int X();
 		void Y(int newy);
@@ -83,6 +88,8 @@ namespace NSKthura{
 		void Alpha255(int value);
 		int Alpha255();
 		int ID();
+		void Animate(KthuraAnimReset RESET=NULL);
+		bool IsInZone(std::string Tag);
 
 		/// <summary>
 		/// Sets the alpha in a 0-1000 scale. Please note that this was a leftover from the very original BlitzMax version of Kthura. That version is discontinued and all systems I used later use the official 0-255 scale. Therefore the use of the 1-1000 scale has been deprecated, and I strongly recommend to use Alpha255 in stead!
@@ -116,11 +123,13 @@ namespace NSKthura{
 		int GridX{ 32 };
 		int GridY{ 32 };
 		std::vector<KthuraObject> Objects;
+		std::map<int, KthuraObject*> GetIDMap();
 
 		KthuraObject* TagMap(std::string Tag);
 		std::map<std::string, KthuraObject*> _DomMap; // not to be documented!
-		std::vector<KthuraObject*>* LayerMap(std::string label);
+		std::vector<KthuraObject*>* LabelMap(std::string label);
 		
+		bool HasTag(std::string Tag);
 		bool Blocked(int x, int y);
 		bool BlockedPix(int x, int y);
 		void RemapDominance();
