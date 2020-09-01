@@ -1,7 +1,7 @@
 // Lic:
 // src/Kthura_Draw.cpp
 // Kthura - Drawing engine
-// version: 20.08.30
+// version: 20.09.01
 // Copyright (C) 2020 Jeroen P. Broks
 // This software is provided 'as-is', without any express or implied
 // warranty.  In no event will the authors be held liable for any damages
@@ -36,7 +36,7 @@ namespace NSKthura {
         //if (layer.ObjectDrawOrder == null) layer.RemapDominance(); // No longer needed! The C++ class now handles this automatically.
         
         //foreach(KthuraObject obj in layer.ObjectDrawOrder) {
-        for(auto&objid:layer.GetIDMap()){
+        for(auto&objid:layer._DomMap){
             auto obj=objid.second;
             if (obj->Visible || IgnoreVisibility) {
                 if (true) { // This looks useless now, but this routine will be used later in optimalisation to see if an object is actually on screen, and if not, ignore it.

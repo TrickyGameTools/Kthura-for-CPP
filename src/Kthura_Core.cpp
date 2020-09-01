@@ -1,7 +1,7 @@
 // Lic:
 // src/Kthura_Core.cpp
 // Kthura - Core
-// version: 20.08.30
+// version: 20.09.01
 // Copyright (C) 2020 Jeroen P. Broks
 // This software is provided 'as-is', without any express or implied
 // warranty.  In no event will the authors be held liable for any damages
@@ -27,6 +27,13 @@
 #include "Kthura_Core.hpp"
 #include "Kthura_Draw.hpp"
 
+#define Kthura_LoadChat
+
+#ifdef Kthura_LoadChat
+    #define KLC(msg) std::cout "Kthura_LoadChat: "<< (msg) <<"\n"
+#else
+    #define KLC(msg) 
+#endif
 
 #define kthload_assert(condition,err) if(!(condition)) { if (!StrictLoad) continue; Throw(err); return;}
 #define kthload_case(thecase) else if (key==thecase)
@@ -48,6 +55,10 @@ namespace NSKthura {
     }
     static std::map<std::string, KthuraKind> MapKind = InitMapKind();
 
+
+    KthuraLayer* KthuraObject::GetParent() {
+        return parent;
+    }
 
     float KthuraObject::TrueScaleX() { return (float)ScaleX / 1000; }
     float KthuraObject::TrueScaleY() { return (float)ScaleY / 1000; }
@@ -103,7 +114,7 @@ namespace NSKthura {
         _impassible = imp;
         if (Kthura::AutoMap) parent->BuildBlockMap();
     }
-    bool KthuraObject::Imapassible() {
+    bool KthuraObject::Impassible() {
         return _impassible;
     }
 
@@ -201,7 +212,13 @@ namespace NSKthura {
     bool KthuraObject::CheckParent(KthuraLayer* p) {
         return parent==p; // Should compare the memory addresses... not the values stored in them!
     }
-    int KthuraLayer::nextID() {        
+    Kthura* KthuraLayer::GetParent() {
+        return parent;
+    }
+    void KthuraLayer::SetParent(Kthura* prnt) {
+        if (!parent) parent = prnt;
+    }
+    int KthuraLayer::nextID() {
         return idinc++; // dirty code!
     }
     std::map<int, KthuraObject*> KthuraLayer::GetIDMap() {
@@ -330,7 +347,7 @@ namespace NSKthura {
         return &Layers[lay];
     }
     void Kthura::NewLayer(std::string lay, bool force) {
-        lay = Upper(lay);
+        lay = Upper(lay);        
         if (Layers.count(lay)) {
             if (force) 
                 KillLayer(lay);
@@ -339,6 +356,7 @@ namespace NSKthura {
                 return;
             }
         }
+        Layers[lay].SetParent(this);
         Layers[lay].TotalRemap();
     }
     void Kthura::KillLayer(std::string lay) {
@@ -418,6 +436,9 @@ namespace NSKthura {
                     }
                     auto key = Upper(Trim(l.substr(0, pi)));
                     auto value = Trim(l.substr(pi + 1));
+#ifdef Kthura_LoadChat
+                    cout << "Loaded line #" << cnt << "> " << key << " = \"" << value << "\";\n";
+#endif
                     vector<string> s;
                     //chat($"{key} = \"{value}\"");
                     // Fine in C#, but in C++ strings don't work here // switch (key) {
@@ -426,6 +447,10 @@ namespace NSKthura {
                         obj = NULL;
                         curlayername = value;
                         curlayer = &Layers[value];
+                        curlayer->SetParent(this);
+#ifdef Kthura_LoadChat
+                        cout << "LAYER is now: " << value << "\n";
+#endif
                     }// break;
                     kthload_case("GRID") { //kthload_case("GRID":
                         if (curlayer == NULL) {
@@ -458,8 +483,8 @@ namespace NSKthura {
                         kthload_assert(obj, "INSERT: No Object");
                         s = Split(value, ',');
                         kthload_assert(s.size() == 2, "INSERT syntax error!");
-                        obj->insertx = stoi(Trim(s[0])) * (-1);
-                        obj->inserty = stoi(Trim(s[1])) * (-1);
+                        obj->insertx = stoi(Trim(s[0]));// *(-1);
+                        obj->inserty = stoi(Trim(s[1]));// *(-1);
                     }//break;
                     kthload_case("ROTATION") {
                         kthload_assert(obj, "ROTATION: No object");
@@ -581,6 +606,19 @@ namespace NSKthura {
         }
     }
 
+    int Kthura::ID() {
+        return _id;
+    }
+
+    Kthura::Kthura() {
+        _id = countup++;
+    }
+
+    Kthura::~Kthura() {
+        KillMap();
+    }
+
+    int Kthura::countup = 0;
 
     
 

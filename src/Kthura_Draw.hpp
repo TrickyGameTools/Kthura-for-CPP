@@ -1,7 +1,7 @@
 // Lic:
 // src/Kthura_Draw.hpp
 // Kthura - Drawing engine (header)
-// version: 20.08.30
+// version: 20.09.01
 // Copyright (C) 2020 Jeroen P. Broks
 // This software is provided 'as-is', without any express or implied
 // warranty.  In no event will the authors be held liable for any damages
@@ -51,8 +51,11 @@ namespace NSKthura {
         static DelDrawPoint DrawExit;
         static DelDrawPoint DrawCSpot;
         static bool IgnoreVisibility ; // If set to true, invisible objects will still be shown.
-
+       
+        // Draw current layer
         static void DrawMap(KthuraLayer &layer, int scrollx = 0, int scrolly = 0, int x = 0, int y = 0);
+
+        // Draw the current map
         static void DrawMap(Kthura &map, std::string layer, int scrollx = 0, int scrolly = 0, int x = 0, int y = 0); 
         // #endregion
     };

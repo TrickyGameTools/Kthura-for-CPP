@@ -1,7 +1,7 @@
 // Lic:
 // src/Kthura_SDL_Driver.hpp
 // Kthura - Driver to make Kthura use SDL (header)
-// version: 20.08.30
+// version: 20.09.01
 // Copyright (C) 2020 Jeroen P. Broks
 // This software is provided 'as-is', without any express or implied
 // warranty.  In no event will the authors be held liable for any damages
@@ -24,7 +24,26 @@
 #include "Kthura_Draw.hpp"
 
 namespace NSKthura{
-}
 
+	class Kthura_Draw_SDL_Driver ;
+	class Kthura_Draw_SDL_Driver :public KthuraDraw {
+	private:
+	public:
+		/// <summary>
+		/// Sets the SDL driver to KthuraDraw. Don't forget to unload this before closing down your C++ program!
+		/// </summary>
+		static void Init();
+
+		void DrawTiledArea(KthuraObject* obj, int ix = 0, int iy = 0, int scrollx = 0, int scrolly = 0);
+		void DrawObstacle(KthuraObject* obj, int ix = 0, int iy = 0, int scrollx = 0, int scrolly = 0);
+		void DrawActor(KthuraActor* obj, int ix = 0, int iy = 0, int scrollx = 0, int scrolly = 0);
+		void DrawPic(KthuraObject* obj, int ix = 0, int iy = 0, int scrollx = 0, int scrolly = 0);
+		void DrawStretchedArea(KthuraObject* obj, int ix = 0, int iy = 0, int scrollx = 0, int scrolly = 0);
+		int ObjectWidth(KthuraObject* obj);
+		int ObjectHeight(KthuraObject* obj);
+		bool HasTexture(KthuraObject* obj);
+
+	};
+}
 
 #endif

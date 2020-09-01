@@ -1,7 +1,7 @@
 // Lic:
 // src/Kthura_Core.hpp
 // Kthura - Core (header)
-// version: 20.08.30
+// version: 20.09.01
 // Copyright (C) 2020 Jeroen P. Broks
 // This software is provided 'as-is', without any express or implied
 // warranty.  In no event will the authors be held liable for any damages
@@ -60,6 +60,7 @@ namespace NSKthura{
 		int _alpha1000 = 0;
 		int _alpha255 = 0;
 	public:
+		KthuraLayer* GetParent();
 		std::map<std::string, std::string> MetaData;
 		std::string Texture = "";
 		bool Visible = true;
@@ -85,7 +86,7 @@ namespace NSKthura{
 		void Labels(std::string nl);
 		std::string Labels();
 		void Impassible(bool imp);
-		bool Imapassible();
+		bool Impassible();
 		void ForcePassible(bool fp);
 		bool ForcePassible();
 		void RotationRadians(double value);
@@ -117,7 +118,7 @@ namespace NSKthura{
 	
 	class KthuraLayer{
 	private:
-		Kthura* parent;
+		Kthura* parent=NULL;
 		std::map<std::string, KthuraObject*> _TagMap;
 		std::map<std::string, std::vector<KthuraObject*>> _LabelMap;		
 		std::vector<bool> _BlockMap;
@@ -126,6 +127,8 @@ namespace NSKthura{
 		int BM_H = 0;
 		int idinc = 0;
 	public:
+		Kthura* GetParent();
+		void SetParent(Kthura* prnt);
 		int nextID();
 		int GridX{ 32 };
 		int GridY{ 32 };
@@ -155,11 +158,13 @@ namespace NSKthura{
 	
 	class Kthura {
 	private:
+		static int countup;
+		int _id;
 	public:
 		///<summary>NEVER, and I repeat NEVER address the Layers map directly unless you know what you are doing!</summary>
 		std::map<std::string, KthuraLayer> Layers;
 		std::map<std::string, std::string> MetaData;
-		jcr6::JT_Dir& TexDir;
+		jcr6::JT_Dir* TexDir=NULL;
 		KthuraLayer* Layer(std::string lay);
 		void NewLayer(std::string lay, bool force = false);
 		void KillLayer(std::string lay);
@@ -177,6 +182,9 @@ namespace NSKthura{
 		/// When set to false, instructions in mapfiles not understood will be ignored. Other wise errors will be reported based on the panic setting!
 		/// </summary>
 		static bool StrictLoad;
+		int ID();
+		Kthura();
+		~Kthura();
 	};
 	
 }
