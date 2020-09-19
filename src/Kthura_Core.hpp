@@ -136,6 +136,7 @@ namespace NSKthura{
 		std::map<int, KthuraObject*> GetIDMap();
 
 		KthuraObject* TagMap(std::string Tag);
+		std::string TagList();
 		std::map<std::string, KthuraObject*> _DomMap; // not to be documented!
 		std::vector<KthuraObject*>* LabelMap(std::string label);
 		KthuraObject* LastObject();
@@ -172,6 +173,7 @@ namespace NSKthura{
 		void KillMap();
 		void Load(jcr6::JT_Dir& JCR, std::string Prefix = "");
 		void Load(std::string JCR, std::string Prefix = "");
+		void Remap();
 		static void Throw(std::string err);
 		/// <summary>
 		/// Should Kthura have an error, this function will be executed *if* it's been defined. If it's not defined it will merely put a message on the console. 
