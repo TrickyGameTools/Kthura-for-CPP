@@ -19,6 +19,7 @@
 // EndLic
 
 #include "Kthura_Draw.hpp"
+#include <iostream>
 
 namespace NSKthura {
 	KthuraDraw* KthuraDraw::DrawDriver=NULL;
@@ -39,6 +40,7 @@ namespace NSKthura {
         for(auto&objid:layer._DomMap){
             auto obj=objid.second;
             if (obj->Visible || IgnoreVisibility) {
+                // std::cout << obj->Kind() << " << Draw\n";
                 if (true) { // This looks useless now, but this routine will be used later in optimalisation to see if an object is actually on screen, and if not, ignore it.
                     if (!DrawDriver) { Kthura::Throw("I cannot draw without a DrawDriver!"); return; }
                         if (!DrawDriver->AnimReset) { Kthura::Throw("DrawDriver has no AnimReset function!"); return; }
@@ -71,7 +73,7 @@ namespace NSKthura {
                     case KthuraKind::Pivot:
                         if (DrawPivot) DrawPivot(obj, x, y, scrollx, scrolly); break;
                     case KthuraKind::Exit:
-                        if(DrawExit) DrawExit(obj, x, y, scrollx, scrolly); break;
+                        if (DrawExit) DrawExit(obj, x, y, scrollx, scrolly); break;
                     case KthuraKind::CustomItem:
                         if (DrawCSpot) DrawCSpot(obj, x, y, scrollx, scrolly); break;
                     default:
