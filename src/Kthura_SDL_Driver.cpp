@@ -39,8 +39,11 @@ namespace NSKthura{
     using namespace TrickyUnits;
     using namespace std;
 
+    TQSG_Image* GetTex(KthuraObject* obj);
+
     void SDL_AnimReset(KthuraObject * O){
-        // TODO: Reset!
+        auto Tex = GetTex(O);
+        if (O->AnimFrame >= Tex->Frames()) O->AnimFrame = 0;
     }
 
     typedef struct TKSDT {
@@ -53,7 +56,7 @@ namespace NSKthura{
 
     void LoadTex(string tag,string tex,Kthura*Map){
         static int actions = 0;
-        //cout << "Load Tex " << tex << " onto tag " << tag << "\n";
+        cout << "Load Tex " << tex << " onto tag " << tag << "\n";
         if (!Map) {
             Kthura::Throw("Internal error! LoadTex did not properly receive a Kthura Map");
             return;
@@ -116,8 +119,7 @@ namespace NSKthura{
         TQSG_Rect(obj->X() + ix-scrollx, obj->Y() + iy-scrolly, obj->w, obj->h);
 #else
         TQSG_Color(obj->R, obj->G, obj->B);
-        GetTex(obj)->Tile(obj->X() + ix - scrollx, obj->Y() + iy - scrolly, obj->w, obj->h,obj->AnimFrame,obj->insertx,obj->inserty);
-
+        GetTex(obj)->Tile(obj->X() + ix - scrollx, obj->Y() + iy - scrolly, obj->w, obj->h,obj->AnimFrame,obj->insertx,obj->inserty);        
 #endif
     }
 
