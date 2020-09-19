@@ -234,6 +234,15 @@ namespace NSKthura {
         return nullptr;
     }
 
+    std::string KthuraLayer::TagList() {
+        std::string ret = "";
+        for (auto& tl : _TagMap) {
+            if (ret != "") ret += ",";
+            ret += tl.first;
+        }
+        return ret;
+    }
+
     std::vector<KthuraObject*>* KthuraLayer::LabelMap(std::string label) {
         if (_LabelMap.count(label)) return &_LabelMap[label];
         return &std::vector<KthuraObject*>();
@@ -596,6 +605,12 @@ namespace NSKthura {
         auto J = jcr6::Dir(JCR);
         if (JCR_Error != "") { Throw("JCR6 file \"" + JCR + "\" could notbe loaded.\nJCR6 reported: " + JCR_Error); return; }
         Load(J, Prefix);
+    }
+
+    void Kthura::Remap() {
+        for (auto ti : Layers) {
+            Layer(ti.first)->TotalRemap();
+        }
     }
 
     void Kthura::Throw(std::string err) {
