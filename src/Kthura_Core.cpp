@@ -1,7 +1,7 @@
 // Lic:
 // src/Kthura_Core.cpp
 // Kthura - Core
-// version: 20.09.01
+// version: 20.09.21
 // Copyright (C) 2020 Jeroen P. Broks
 // This software is provided 'as-is', without any express or implied
 // warranty.  In no event will the authors be held liable for any damages
@@ -40,6 +40,7 @@
 
 namespace NSKthura {
     using namespace TrickyUnits;
+    using namespace std;
     const double Pi = 3.141593;
 
     static std::map<std::string, KthuraKind> InitMapKind() {
@@ -82,6 +83,10 @@ namespace NSKthura {
     int KthuraObject::X() {
         return _x;
     }
+    void KthuraObject::Xp(int add) { X(X() + add); }
+    void KthuraObject::Yp(int add) { Y(Y() + add); }
+    void KthuraObject::Xm(int sub) { X(X() - sub); }
+    void KthuraObject::Ym(int sub) { Y(Y() - sub); }
     void KthuraObject::Y(int newy) {
         _y = newy;
         if (Kthura::AutoMap) parent->RemapDominance();
@@ -212,6 +217,8 @@ namespace NSKthura {
     bool KthuraObject::CheckParent(KthuraLayer* p) {
         return parent==p; // Should compare the memory addresses... not the values stored in them!
     }
+    KthuraObject::KthuraObject() {}
+    KthuraObject::KthuraObject(KthuraLayer* p) { parent = p; _Kind = "???"; }
     Kthura* KthuraLayer::GetParent() {
         return parent;
     }
@@ -252,13 +259,25 @@ namespace NSKthura {
         return &Objects[Objects.size()-1];
     }
 
+    std::string KthuraLayer::BlockMapStringDump() {
+        BuildBlockMap();
+        string ret = "";
+        for (int y = 0; y <= BlockMapBoundH; ++y) {
+            if (y) ret += "\n";
+            for (int x = 0; x <= BlockMapBoundW; ++x) {
+                if (Blocked(x, y)) ret += "X"; else ret += "_";
+            }
+        }
+        return ret;
+    }
+
     bool NSKthura::KthuraLayer::HasTag(std::string Tag) {
         return _TagMap.count(Tag);
     }
 
     bool KthuraLayer::Blocked(int x, int y) {
-        if (x < 0 || y < 0 || x >= BM_W || y >= BM_H) return true;
-        return _BlockMap[(y*BM_W)+x];
+        if (x < 0 || y < 0 || x >= BlockMapBoundW || y >= BlockMapBoundH) return true;
+        return _BlockMap[(y*(BlockMapBoundW+1))+x];
     }
 
     bool KthuraLayer::BlockedPix(int x, int y) {
@@ -294,6 +313,178 @@ namespace NSKthura {
     }
 
     void KthuraLayer::BuildBlockMap() {
+            auto GW = GridX;
+            auto GH = GridY;
+            int X, Y, W, H; //BX, BY,
+            int TX, TY, AX, AY, TW, TH;
+            int BoundX = 0, BoundY = 0;
+            int iw, tiw, ih, tih;
+            // Let's first get the bounderies
+            for(auto& O : Objects) {
+                X = O.X(); if (X < 0) X = 0;
+                Y = O.Y(); if (Y < 0) Y = 0;
+                W = O.w - 1; if (W < 0) W = 0;
+                H = O.h - 1; if (H < 0) H = 0;
+                switch (O.EKind()) {
+                case KthuraKind::TiledArea:
+                case KthuraKind::Zone:
+                case KthuraKind::StretchedArea:
+                    TX = ceil((double)((X + W) / GW));
+                    TY = ceil((double)((Y + H) / GH));
+                    if (TX > BoundX) BoundX = TX;
+                    if (TY > BoundY) BoundY = TY;
+                    break;
+                case KthuraKind::Obstacle:
+                    TX = floor((double)(X / GW));
+                    TY = floor((double)(Y / GH));
+                    if (TX > BoundX) BoundX = TX;
+                    if (TY > BoundY) BoundY = TY;
+                    break;
+                case KthuraKind::Pic:
+                    TX = floor((double)(X / GW));
+                    TY = floor((double)(Y / GH));
+                    if (TX > BoundX) BoundX = TX;
+                    if (TY > BoundY) BoundY = TY;
+                    break;
+                }
+            }
+            BlockMapBoundW = BoundX;
+            BlockMapBoundH = BoundY;
+            //BlockMap = new bool[BoundX + 1, BoundY + 1];
+            _BlockMap.clear(); for (int i = 0; i < (BoundX + 1) * (BoundY + 1); ++i) _BlockMap.push_back(false); // Primitive, but for now all I got.
+            // And now for the REAL work.		
+            for(KthuraObject& O : Objects) {
+                if (O.Impassible()) {
+                    //Debug.WriteLine($"Checking object {O.kind}; {O.Texture}; {O.Labels}");
+                    X = O.X(); if (X < 0) X = 0;
+                    Y = O.Y(); if (Y < 0) Y = 0;
+                    W = O.w - 1; if (W < 0) W = 0;
+                    H = O.h - 1; if (H < 0) H = 0;
+                    switch (O.EKind()) {
+                    case KthuraKind::TiledArea:
+                    case KthuraKind::Zone:
+                    case KthuraKind::StretchedArea:
+                        //Kthura.EDITTORLOG($"Working on Impassible {O.kind} {O.Tag}");
+                        TX = floor((double)X / GW);
+                        TY = floor((double)Y / GH);
+                        TW = ceil((double)((X + W) / GW));
+                        TH = ceil((double)((Y + H) / GH));
+                        //Print "DEBUG: Blockmapping area ("+TX+","+TY+") to ("+TW+","+TH+")"
+                        for (AX = TX; AX <= TW; AX++) {
+                            for (AY = TY; AY <= TH; AY++) {
+                                //for (AX = TX; AX < TW; AX++) {
+                                //    for (AY = TY; AY < TH; AY++) {
+                                try {
+                                    //Kthura.EDITTORLOG($"Blocking {AX},{AY}");
+                                    _BlockMap[AX+(AY*(BoundX+1))]= true;
+                                } catch(...) {
+                                    //throw new Exception($"BlockMap[{AX},{AY}]: Out of bounds ({BlockMap.GetLength(0)}x{BlockMap.GetLength(1)})");
+                                    Kthura::Throw("BlockMap["+to_string(AX)+","+to_string(AY)+"]: Out of bounds ("+to_string(BlockMapBoundW)+"x"+to_string(BlockMapBoundH)+")");
+                                }
+                            }
+                        }
+                        break;
+                    case KthuraKind::Obstacle:
+                        TX = floor((double)(X / GW));
+                        TY = floor((double)((Y - 1) / GH));
+                        //BlockMap[TX, TY] = true;
+                        _BlockMap[AX + (AY * (BoundX + 1))] = true;
+                        if (KthuraDraw::DrawDriver == NULL) Kthura::Throw("Draw Driver is null!");
+                        if (KthuraDraw::DrawDriver->HasTexture(&O))
+                            iw = KthuraDraw::DrawDriver->ObjectWidth(&O);
+                        else
+                            iw = 0;
+                        tiw = ceil((double)iw / GW) - 1;
+
+                        for (AX = TX - (tiw); AX <= TX + (tiw); AX++) {
+                            if (AX >= 0 && AX <= BoundX && TY <= BoundY && TY >= 0) _BlockMap[AX + (AY * (BoundX + 1))] = true; //BlockMap[AX, TY] = true;
+                        }
+                        break;
+                    case KthuraKind::Pic:
+                        TX = floor((double)X / GW);
+                        TY = floor((double)Y / GH);
+                        //BlockMap[TX, TY] = true;
+                        _BlockMap[AX + (AY * (BoundX + 1))] = true;
+                        if (KthuraDraw::DrawDriver->HasTexture(&O)) {
+                            iw = KthuraDraw::DrawDriver->ObjectWidth(&O); //ImageWidth(o.textureimage)
+                            tiw = ceil((double)iw / GW);
+                            ih = KthuraDraw::DrawDriver->ObjectHeight(&O); //ImageHeight(o.textureimage)
+                            tih = ceil((double)ih / GH);
+                            for (AX = TX; AX < TX + (tiw); AX++) for (AY = TY; AY < TY + tih; AY++) {
+                                if (AX >= 0 && AX <= BoundX && AY <= BoundY && AY >= 0) _BlockMap[AX + (AY * (BoundX + 1))] = true;// BlockMap[AX, AY] = true;
+                            }
+                        }
+                        break;
+                    }
+                }
+            }
+            // And this will force a way open if applicable	
+            for(KthuraObject &O : Objects) {
+                if (O.ForcePassible()) {
+                    X = O.X(); if (X < 0) X = 0;
+                    Y = O.Y(); if (Y < 0) Y = 0;
+                    W = O.w - 1; if (W < 0) W = 0;
+                    H = O.h - 1; if (H < 0) H = 0;
+                    switch (O.EKind()) {
+                    case KthuraKind::TiledArea:
+                    case KthuraKind::Zone:
+                    case KthuraKind::StretchedArea:
+                        //Kthura.EDITTORLOG($"Working on Impassible {O.kind} {O.Tag}");
+                        TX = floor((double)X / GW);
+                        TY = floor((double)Y / GH);
+                        TW = ceil((double)((X + W) / GW));
+                        TH = ceil((double)((Y + H) / GH));
+                        //Print "DEBUG: Blockmapping area ("+TX+","+TY+") to ("+TW+","+TH+")"
+                        for (AX = TX; AX <= TW; AX++) {
+                            for (AY = TY; AY <= TH; AY++) {
+                                //for (AX = TX; AX < TW; AX++) {
+                                //    for (AY = TY; AY < TH; AY++) {
+                                try {
+                                    //Kthura.EDITTORLOG($"Blocking {AX},{AY}");
+                                    _BlockMap[AX + (AY * (BoundX + 1))] = false;
+                                } catch (...) {
+                                    //throw new Exception($"BlockMap[{AX},{AY}]: Out of bounds ({BlockMap.GetLength(0)}x{BlockMap.GetLength(1)})");
+                                    Kthura::Throw("BlockMap[" + to_string(AX) + "," + to_string(AY) + "]: Out of bounds (" + to_string(BlockMapBoundW) + "x" + to_string(BlockMapBoundH) + ")");
+                                }
+                            }
+                        }
+                        break;
+                    case KthuraKind::Obstacle:
+                        TX = floor((double)(X / GW));
+                        TY = floor((double)((Y - 1) / GH));
+                        //BlockMap[TX, TY] = false;
+                        _BlockMap[AX + (AY * (BoundX + 1))] = false;
+                        if (KthuraDraw::DrawDriver == NULL) Kthura::Throw("Draw Driver is null!");
+                        if (KthuraDraw::DrawDriver->HasTexture(&O))
+                            iw = KthuraDraw::DrawDriver->ObjectWidth(&O);
+                        else
+                            iw = 0;
+                        tiw = ceil((double)iw / GW) - 1;
+
+                        for (AX = TX - (tiw); AX <= TX + (tiw); AX++) {
+                            if (AX >= 0 && AX <= BoundX && TY <= BoundY && TY >= 0) _BlockMap[AX + (AY * (BoundX + 1))] = false; //BlockMap[AX, TY] = true;
+                        }
+                        break;
+                    case KthuraKind::Pic:
+                        TX = floor((double)X / GW);
+                        TY = floor((double)Y / GH);
+                        //BlockMap[TX, TY] = false;
+                        _BlockMap[AX + (AY * (BoundX + 1))] = false;
+                        if (KthuraDraw::DrawDriver->HasTexture(&O)) {
+                            iw = KthuraDraw::DrawDriver->ObjectWidth(&O); //ImageWidth(o.textureimage)
+                            tiw = ceil((double)iw / GW);
+                            ih = KthuraDraw::DrawDriver->ObjectHeight(&O); //ImageHeight(o.textureimage)
+                            tih = ceil((double)ih / GH);
+                            for (AX = TX; AX < TX + (tiw); AX++) for (AY = TY; AY < TY + tih; AY++) {
+                                if (AX >= 0 && AX <= BoundX && AY <= BoundY && AY >= 0) _BlockMap[AX + (AY * (BoundX + 1))] = false;// BlockMap[AX, AY] = true;
+                            }
+                        }
+                        break;
+                    }
+                }
+            }
+            
+        
     }
 
     void KthuraLayer::RemapID() {
@@ -635,6 +826,184 @@ namespace NSKthura {
 
     int Kthura::countup = 0;
 
+    KthuraPathFinder* Kthura::PathFinder = NULL;
+
     
+
+    void KthuraPoint::GX(int v) {
+        _grix = v;
+        _exax = floor((v * parent->GridX) + (parent->GridX / 2));
+    }
+
+    void KthuraPoint::GY(int v) {
+        _griy = v;
+        _exax = floor((v * parent->GridY) + (parent->GridY));
+    }
+
+    void KthuraPoint::XX(int v) {
+        _exax = v;
+        _grix = floor(v / parent->GridX);
+    }
+
+    void KthuraPoint::XY(int v) {
+        _exay = v;
+        _griy = floor(v / parent->GridY);
+    }
+
+    int KthuraPoint::GX() {
+        return _grix;
+    }
+
+    int KthuraPoint::GY() {
+        return _griy;
+    }
+    int KthuraPoint::XX() {
+        return _exax;
+    }
+
+    int KthuraPoint::XY() {
+        return _exay;
+    }
+
+    void KthuraActor::Walk2Move() {
+        if (Walking) {
+            MoveX = FoundPath[PathIndex].XX();
+            MoveY = FoundPath[PathIndex].XY()-1;
+            Moving = true;
+        }
+    }
+
+    void KthuraActor::InMotion(bool value) { _InMotion = value; }
+
+    bool KthuraActor::InMotion() {
+        if (WalkingIsInMotion)
+            return Walking || Moving;
+        else
+            return _InMotion;
+    }
+
+    int KthuraActor::PathLength() { return FoundPath.size(); }
+
+    int KthuraActor::CWalkX() {
+        if (Walking) return FoundPath[PathIndex].GX();
+        return 0;
+    }
+    int KthuraActor::CWalkY() {
+        if (Walking) return FoundPath[PathIndex].GY();
+        return 0;
+    }
+
+    void KthuraActor::WalkTo(int to_x, int to_y, bool real) {
+        auto gridx = GetParent()->GridX;
+        auto gridy = GetParent()->GridY;
+        int tox = to_x, toy = to_y;
+        int fromx = X(), fromy = Y();
+        if (real) {
+            tox = to_x / gridx;
+            toy = to_y / gridy;
+            fromx = X() / gridx;
+            fromy = Y() / gridy;
+        }
+        // Old C# code but not usable in this C++ version: FoundPath = Dijkstra.QuickPath(Parent.PureBlockRev, Parent.BlockMapWidth, Parent.BlockMapHeight, fromx, fromy, tox, toy);
+        FoundPath = Kthura::PathFinder->FindPath(this, tox, toy);
+        if (Kthura::PathFinder->Success) { //if (FoundPath.Success) {
+            PathIndex = 0;
+            Walking = true;
+            WalkingToX = to_x; //FoundPath.Nodes[0].x;
+            WalkingToY = to_y; //FoundPath.Nodes[1].y;
+            MoveX = X();
+            MoveY = Y();
+            Walk2Move();
+        } else {
+            Walking = false;
+            //FoundPath = null;
+        }
+    }
+
+    void KthuraActor::WalkTo(KthuraObject* obj) { WalkTo(obj->X(), obj->Y()); }
+    void KthuraActor::WalkTo(std::string Tag) { WalkTo(GetParent()->TagMap(Tag)); }
+
+    void KthuraActor::MoveTo(int x, int y) {
+        MoveX = x;
+        MoveY = y;
+        Moving = true;
+    }
+
+    void KthuraActor::MoveTo(KthuraObject* obj) { MoveTo(obj->X(), obj->Y()); }
+    void KthuraActor::MoveTo(std::string Tag) { MoveTo(GetParent()->TagMap(Tag)); }
+
+    KthuraActor* KthuraActor::Spawn(KthuraLayer* parent, string spot) {
+        KthuraActor* ret;
+        { KthuraActor created(parent); parent->Objects.push_back(created); ret = &created; }
+        auto obj = parent->TagMap(spot);
+        ret->X(obj->X());
+        ret->Y(obj->Y());
+        ret->Dominance ( obj->Dominance());
+        ret->Alpha255(255);
+        ret->R = 255;
+        ret->G = 255;
+        ret->B = 255;
+        ret->Visible = true;
+        ret->Impassible ( false);
+        if (obj->MetaData.count("Wind")) ret->Wind = obj->MetaData["Wind"]; else ret->Wind = "NORTH";
+        return ret;        
+    }
+
+    KthuraActor* KthuraActor::Spawn(KthuraLayer* parent, int x, int y, std::string wind, unsigned char R, unsigned char G, unsigned char B, unsigned char alpha, int Dominance) {
+        KthuraActor* ret;
+        { KthuraActor created(parent); parent->Objects.push_back(created); ret = &created; }
+        //var ret = new KthuraActor(parent);
+        ret->X(x);
+        ret->Y(y);
+        ret->Wind = wind;
+        ret->R = R;
+        ret->G = G;
+        ret->B = B;
+        ret->Alpha255(alpha);
+        ret->Dominance(Dominance);
+        ret->Visible = true;
+        ret->Impassible(false);
+        return ret;
+    }
+
+    void KthuraActor::UpdateMoves() {
+        if (Moving || Walking) {
+            if (MoveX < X()) { Xm( MoveSkip); if (X() < MoveX) X(  MoveX); if (AutoWind) Wind = "WEST"; }
+            if (MoveX > X()) { Xp( MoveSkip); if (X() > MoveX) X( MoveX); if (AutoWind) Wind = "EAST"; }
+            if (MoveY < Y()) { Ym(MoveSkip); if (Y() < MoveY) Y ( MoveY); if (AutoWind) Wind = "NORTH"; }
+            if (MoveY > Y()) { Yp( MoveSkip); if (Y() > MoveY) Y(  MoveY); if (AutoWind) Wind = "SOUTH"; }
+            if (MoveX == X() && MoveY == Y()) {
+                if (!Walking)
+                    Moving = false;
+                else {
+                    PathIndex++;
+                    if (PathIndex >= PathLength()) {
+                        Walking = false;
+                        Moving = false;
+                    } else {
+                        Walk2Move();
+                    }
+                }
+            }
+        } else {
+            MoveX = X();
+            MoveY = Y();
+        }
+        if ((WalkingIsInMotion && Walking) || InMotion()) {
+            FrameSpeedCount++;
+            if (FrameSpeedCount >= FrameSpeed) {
+                FrameSpeedCount = 0;
+                AnimFrame++;
+            }
+        } else if (WalkingIsInMotion && (!Walking)) AnimFrame = 0;    
+    }
+
+    std::string KthuraActor::Kind() { return "Actor"; }
+    KthuraKind KthuraActor::EKind() { return KthuraKind::Actor; }
+
+    KthuraActor::KthuraActor(KthuraLayer* argparent){
+        parent = argparent;
+        _Kind = "Actor";
+    }
 
 }

@@ -1,7 +1,7 @@
 // Lic:
 // src/Kthura_Core.hpp
 // Kthura - Core (header)
-// version: 20.09.01
+// version: 20.09.21
 // Copyright (C) 2020 Jeroen P. Broks
 // This software is provided 'as-is', without any express or implied
 // warranty.  In no event will the authors be held liable for any damages
@@ -27,6 +27,7 @@
 
 // Requires Tricky's Units!
 #include <QuickString.hpp>
+//#include <dim2.hpp> // Didn't work the way it should... Needs more study!
 
 // JCR6 is needed for loading. Kthura files are just JCR6 files after all
 #include <jcr6_core.hpp>
@@ -39,12 +40,36 @@ namespace NSKthura{
 	class KthuraLayer;
 	class KthuraObject;
 	class KthuraActor;
+	class KthuraPathFinder;
 	
 	typedef void (*KthuraAnimReset)(KthuraObject* O);
+
+	class KthuraPoint {
+	private:
+		KthuraLayer* parent;
+		int _exax = 0;
+		int _exay = 0;
+		int _grix = 0;
+		int _griy = 0;
+	public:
+		void GX(int v);
+		void GY(int v);
+		void XX(int v);
+		void XY(int v);
+		int GX();
+		int GY();
+		int XX();
+		int XY();
+	};
+
+	class KthuraPathFinder {
+	public:
+		virtual std::vector<KthuraPoint> FindPath(KthuraActor* A, int x, int y) = 0;
+		bool Success = false; // Should contain 'true' if the last path finding attempt was succesful.
+	};
 	
 	class KthuraObject {
 	private:
-		KthuraLayer* parent;
 		//int cnt = 0;
 		int _id = 0;
 		int _x = 0, _y = 0;
@@ -54,11 +79,13 @@ namespace NSKthura{
 		std::string _Tag = "";
 		bool _impassible = false;
 		bool _forcepassible = false;
-		std::string _Kind;
 		double _rotrad = 0;
 		int _rotdeg = 0;
 		int _alpha1000 = 0;
 		int _alpha255 = 0;
+	protected:
+		KthuraLayer* parent;
+		std::string _Kind;
 	public:
 		KthuraLayer* GetParent();
 		std::map<std::string, std::string> MetaData;
@@ -77,6 +104,10 @@ namespace NSKthura{
 		KthuraKind EKind();
 		void X(int newx);
 		int X();
+		void Xp(int add);
+		void Yp(int add);
+		void Xm(int sub);
+		void Ym(int syb);
 		void Y(int newy);
 		int Y();
 		void Tag(std::string newtag);
@@ -110,10 +141,53 @@ namespace NSKthura{
 		int Alpha1000();
 		static 	KthuraObject Create(std::string Kind,KthuraLayer* p);
 		bool CheckParent(KthuraLayer* p);
+		KthuraObject();
+		KthuraObject(KthuraLayer* p); // Should only be used by derrived classes
 	};
 
 	class KthuraActor :public KthuraObject {
+	private:
+		bool _InMotion=false;
+		void Walk2Move();
+	public:
+		//public object DriverTextureObject = null; // To be defined by the graphics driver for its own needs
+		std::string ChosenPic = "";
 
+		void InMotion(bool value);
+		bool InMotion();
+		bool NotInMotionThen0 = true;
+		bool Walking = false;
+		bool WalkingIsInMotion = true;
+		bool Moving = false;
+		bool MoveIgnoreBlock = false;
+		bool AutoWind = true;
+		int UnMoveTimer = 4;
+		int MoveX = 0, MoveY = 0;
+		int MoveSkip = 4;
+		int FrameSpeed = 4;
+		int FrameSpeedCount = 0;
+		int WalkSpot = 0;
+		std::string Wind = "North";
+		int WalkingToX = 0, WalkingToY = 0;
+		//Path FoundPath = null;
+		std::vector<KthuraPoint> FoundPath;
+		int PathIndex = 0;
+		int PathLength();
+		int Cycle = -1;
+		int CWalkX();
+		int CWalkY();
+		void WalkTo(int to_x, int to_y, bool real = true);
+		void WalkTo(KthuraObject* obj);
+		void WalkTo(std::string Tag);
+		void MoveTo(int x, int y);
+		void MoveTo(KthuraObject* obj);
+		void MoveTo(std::string Tag);
+		KthuraActor* Spawn(KthuraLayer* parent, std::string spot);
+		KthuraActor* Spawn(KthuraLayer* parent, int x, int y, std::string wind = "NORTH", unsigned char R = 255, unsigned char G = 255, unsigned char B = 255, unsigned char alpha = 255, int Dominance = 20);
+		void UpdateMoves();
+		std::string Kind();
+		KthuraKind EKind();
+		KthuraActor(KthuraLayer* parent);
 	};
 	
 	class KthuraLayer{
@@ -122,7 +196,9 @@ namespace NSKthura{
 		std::map<std::string, KthuraObject*> _TagMap;
 		std::map<std::string, std::vector<KthuraObject*>> _LabelMap;		
 		std::vector<bool> _BlockMap;
+		//dim2<bool> _Blockmap(1, 1);
 		std::map<int, KthuraObject*> ID_Map;
+		int BlockMapBoundW{ 0 }, BlockMapBoundH{ 0 };
 		int BM_W = 0;
 		int BM_H = 0;
 		int idinc = 0;
@@ -140,6 +216,8 @@ namespace NSKthura{
 		std::map<std::string, KthuraObject*> _DomMap; // not to be documented!
 		std::vector<KthuraObject*>* LabelMap(std::string label);
 		KthuraObject* LastObject();
+
+		std::string BlockMapStringDump(); // For debug purposes only!
 		
 		bool HasTag(std::string Tag);
 		bool Blocked(int x, int y);
@@ -179,6 +257,7 @@ namespace NSKthura{
 		/// Should Kthura have an error, this function will be executed *if* it's been defined. If it's not defined it will merely put a message on the console. 
 		/// </summary>
 		static void (*Panic)(std::string msg);
+		static KthuraPathFinder* PathFinder;
 		static bool AutoMap;
 		/// <summary>
 		/// When set to false, instructions in mapfiles not understood will be ignored. Other wise errors will be reported based on the panic setting!
