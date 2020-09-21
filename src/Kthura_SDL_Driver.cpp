@@ -1,7 +1,7 @@
 // Lic:
 // src/Kthura_SDL_Driver.cpp
 // Kthura - Driver to make Kthura use SDL
-// version: 20.09.01
+// version: 20.09.21
 // Copyright (C) 2020 Jeroen P. Broks
 // This software is provided 'as-is', without any express or implied
 // warranty.  In no event will the authors be held liable for any damages
@@ -33,6 +33,8 @@
 #undef Kthura_TEST_TA
 #undef Kthura_TEST_SA
 #undef Kthura_TEST_OB
+
+#define byte unsigned char
 
 namespace NSKthura{
 
@@ -137,7 +139,25 @@ namespace NSKthura{
     }
 
     void Kthura_Draw_SDL_Driver::DrawActor(KthuraActor* obj, int ix, int iy, int scrollx, int scrolly) {
-        Kthura::Throw("Actors not yet supported");
+        //Kthura::Throw("Actors not yet supported");
+        auto tx = GetTex(obj);
+        if (tx) {
+            obj->UpdateMoves();
+            TQSG_Color((byte)obj->R, (byte)obj->G, (byte)obj->B);
+            //TQMG.SetAlphaFloat((float)obj.Alpha1000 / 1000);
+            TQSG_SetAlpha((byte)obj->Alpha255());
+            //TQMG.RotateRAD((float)obj.RotationRadians);
+            TQSG_Rotate(obj->RotationDegrees());                        
+            SetScale(obj->ScaleX/1000, obj->ScaleY/1000);
+            if (obj->AnimFrame >= tx->Frames()) obj->AnimFrame = 0;
+            tx->XDraw(obj->X() + ix - scrollx, obj->Y() + iy - scrolly, obj->AnimFrame);
+            SetScale(1, 1);
+            TQSG_RotateRAD(0);
+            TQSG_SetAlpha(255);
+        } else {
+            //CrashOnNoTex ? .Invoke($"Actor-texture '{obj.Texture}' did somehow not load?");
+            Kthura::Throw("Actor-texture '" + obj->Texture + "' did somehow not load?");
+        }
     }
 
     void Kthura_Draw_SDL_Driver::DrawPic(KthuraObject* obj, int ix, int iy, int scrollx, int scrolly) {
