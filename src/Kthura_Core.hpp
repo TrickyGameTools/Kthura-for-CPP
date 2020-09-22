@@ -201,6 +201,7 @@ namespace NSKthura{
 		int AnimFrameSkip;
 		int _id;
 	public:
+		// General
 		bool autokill = false;
 		~KthuraObject();
 		KthuraObject(std::string aKind, KthuraLayer* prnt);
@@ -264,7 +265,7 @@ namespace NSKthura{
 		void G(int value);
 		void B(int value);
 		
-
+		// Some general methods
 		void Animate(KthuraAnimReset RESET = NULL);
 		void Xp(int value);
 		void Yp(int value);
@@ -274,6 +275,15 @@ namespace NSKthura{
 		bool IsInZone(std::string zone);
 		bool CheckParent(KthuraLayer* p);
 
+		// Actors only properties
+		bool Walking();
+		void Walking(bool value);
+
+		// Actors only Methods
+		void UpdateMoves();
+
+
+		// Create and import
 		static KthuraObject Create(std::string Kind, KthuraLayer* p);
 		static KthuraObject Import(KthuraActor* Act);
 	};

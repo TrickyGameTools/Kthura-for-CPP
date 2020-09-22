@@ -35,7 +35,8 @@ namespace NSKthura {
         // #region The Abstract part every Draw Driver must have!
         virtual void DrawTiledArea(KthuraObject* obj, int ix = 0, int iy = 0, int scrollx = 0, int scrolly = 0) = 0;
         virtual void DrawObstacle(KthuraObject* obj, int ix = 0, int iy = 0, int scrollx = 0, int scrolly = 0) = 0;
-        virtual void DrawActor(KthuraActor* obj, int ix = 0, int iy = 0, int scrollx = 0, int scrolly = 0) = 0;
+        //virtual void DrawActor(KthuraActor* obj, int ix = 0, int iy = 0, int scrollx = 0, int scrolly = 0) = 0;
+        virtual void DrawActor(KthuraObject* obj, int ix = 0, int iy = 0, int scrollx = 0, int scrolly = 0) = 0;
         virtual void DrawPic(KthuraObject* obj, int ix = 0, int iy = 0, int scrollx = 0, int scrolly = 0) = 0;
         virtual void DrawStretchedArea(KthuraObject* obj, int ix = 0, int iy = 0, int scrollx = 0, int scrolly = 0) = 0;
         KthuraAnimReset AnimReset = NULL;

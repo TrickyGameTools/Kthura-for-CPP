@@ -38,10 +38,13 @@
 #define kthload_assert(condition,err) if(!(condition)) { if (!StrictLoad) continue; Throw(err); return;}
 #define kthload_case(thecase) else if (key==thecase)
 
-#define kthobjret(what) if (A) return A->what; else return O->what
+#define kthobjret(what)  if (A) return A->what; else return O->what
 #define kthobjretf(what) if (A) return A->what(); else return O->what()
-#define kthobjdef(what) if (A) A->what = value; else O->what = value
+#define kthobjdef(what)  if (A) A->what = value; else O->what = value
 #define kthobjset(what)  if (A) A->what(value); else O->what(value)
+#define kthactdef(what)  if (!A) Kthura::Throw("Definition Actor-Only value"); A->what=value
+#define kthactret(what)  if (!A) Kthura::Throw("Trying to return from Actor-Only member"); return A->what
+#define kthactset(what)  if (!A) Kthura::Throw("Setting Actor-Only property") A->what(value);
 
 
 namespace NSKthura {
@@ -197,6 +200,9 @@ namespace NSKthura {
     }
     bool KthuraObject::IsInZone(string zone) { kthobjret(IsInZone(zone)); }
     bool KthuraObject::CheckParent(KthuraLayer* p) { kthobjret(CheckParent(p)); }
+    bool KthuraObject::Walking() { kthactret(Walking); }
+    void KthuraObject::Walking(bool value) { kthactdef(Walking); }
+    void KthuraObject::UpdateMoves() { if (!A) Kthura::Throw("Actors-Only method: UpdateMoves()"); A->UpdateMoves(); }
     void KthuraObject::Xm(int value) { kthobjset(Xm); }
     void KthuraObject::Yp(int value) { kthobjset(Yp); }
     void KthuraObject::Xp(int value) { kthobjset(Xp); }

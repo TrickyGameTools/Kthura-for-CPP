@@ -39,7 +39,7 @@ namespace NSKthura {
         //foreach(KthuraObject obj in layer.ObjectDrawOrder) {
         for(auto&objid:layer._DomMap){
             auto obj=objid.second;
-            if (obj->Visible || IgnoreVisibility) {
+            if (obj->Visible() || IgnoreVisibility) {
                 // std::cout << obj->Kind() << " << Draw\n";
                 if (true) { // This looks useless now, but this routine will be used later in optimalisation to see if an object is actually on screen, and if not, ignore it.
                     if (!DrawDriver) { Kthura::Throw("I cannot draw without a DrawDriver!"); return; }
@@ -65,7 +65,8 @@ namespace NSKthura {
                     case KthuraKind::Actor: {
                         int oldx = x;
                         int oldy = y;
-                        DrawDriver->DrawActor((KthuraActor*)obj, x, y, scrollx, scrolly);
+                        //DrawDriver->DrawActor((KthuraActor*)obj, x, y, scrollx, scrolly);
+                        DrawDriver->DrawActor(obj, x, y, scrollx, scrolly);
                         actorsmoved = actorsmoved || oldx != x || oldy != y;
                         break;
                     }
