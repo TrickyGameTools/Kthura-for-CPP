@@ -1,7 +1,7 @@
 // Lic:
 // src/Kthura_Core.hpp
 // Kthura - Core (header)
-// version: 20.09.21
+// version: 20.09.22
 // Copyright (C) 2020 Jeroen P. Broks
 // This software is provided 'as-is', without any express or implied
 // warranty.  In no event will the authors be held liable for any damages
