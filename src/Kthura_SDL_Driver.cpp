@@ -1,7 +1,7 @@
 // Lic:
 // src/Kthura_SDL_Driver.cpp
 // Kthura - Driver to make Kthura use SDL
-// version: 20.09.01
+// version: 20.09.22
 // Copyright (C) 2020 Jeroen P. Broks
 // This software is provided 'as-is', without any express or implied
 // warranty.  In no event will the authors be held liable for any damages
@@ -34,6 +34,8 @@
 #undef Kthura_TEST_SA
 #undef Kthura_TEST_OB
 
+#define byte unsigned char
+
 namespace NSKthura{
 
     using namespace TrickyUnits;
@@ -43,7 +45,7 @@ namespace NSKthura{
 
     void SDL_AnimReset(KthuraObject * O){
         auto Tex = GetTex(O);
-        if (O->AnimFrame >= Tex->Frames()) O->AnimFrame = 0;
+        if (O->AnimFrame() >= Tex->Frames()) O->AnimFrame(0);
     }
 
     typedef struct TKSDT {
@@ -90,14 +92,14 @@ namespace NSKthura{
 
     TQSG_Image* GetTex(KthuraObject*obj) {
         TQSG_Image* ret = NULL;
-        string Tag = obj->Kind() + "::" + obj->Texture;
+        string Tag = obj->Kind() + "::" + obj->Texture();
         auto lay = obj->GetParent();
         auto map = lay->GetParent();
         // cout << "Addr.Lay = " << lay << "; Addr.Map = " << map << "\n";
         if (!KSDT.count(Tag))
-            LoadTex(Tag, obj->Texture,map);
+            LoadTex(Tag, obj->Texture(),map);
         if (!KSDT.count(Tag)) {
-            Kthura::Throw("Could not retrieve texture: " + obj->Texture);
+            Kthura::Throw("Could not retrieve texture: " + obj->Texture());
             return NULL; // Safety precaution
         }
         auto TEX = &KSDT[Tag];
@@ -118,26 +120,47 @@ namespace NSKthura{
         TQSG_Color(255, 0, 0);
         TQSG_Rect(obj->X() + ix-scrollx, obj->Y() + iy-scrolly, obj->w, obj->h);
 #else
-        TQSG_Color(obj->R, obj->G, obj->B);
-        GetTex(obj)->Tile(obj->X() + ix - scrollx, obj->Y() + iy - scrolly, obj->w, obj->h,obj->AnimFrame,obj->insertx,obj->inserty);        
+        TQSG_Color(obj->R(), obj->G(), obj->B());
+        GetTex(obj)->Tile(obj->X() + ix - scrollx, obj->Y() + iy - scrolly, obj->W(), obj->H(),obj->AnimFrame(),obj->insertx(),obj->inserty());        
 #endif
     }
 
     void Kthura_Draw_SDL_Driver::DrawObstacle(KthuraObject* obj, int ix, int iy, int scrollx, int scrolly) {
+        //cout << "Obstacle\n";
 #ifdef Kthura_TEST_OB
         TQSG_Color(255, 180, 0);
         for (int i = 0; i < 50; i++) TQSG_Circle(obj->X() + ix - scrollx, obj->Y() + iy - scrolly, i);
 #else
-        TQSG_Color(obj->R, obj->G, obj->B);
+        TQSG_Color(obj->R(), obj->G(), obj->B());
         auto oldr = TQSG_Rotate();
         TQSG_Rotate(obj->RotationDegrees());
-        GetTex(obj)->XDraw(obj->X(), obj->Y(),obj->AnimFrame);
+        GetTex(obj)->XDraw(obj->X(), obj->Y(),obj->AnimFrame());
         TQSG_Rotate(oldr);
 #endif
     }
 
-    void Kthura_Draw_SDL_Driver::DrawActor(KthuraActor* obj, int ix, int iy, int scrollx, int scrolly) {
-        Kthura::Throw("Actors not yet supported");
+    void Kthura_Draw_SDL_Driver::DrawActor(KthuraObject* obj, int ix, int iy, int scrollx, int scrolly) {
+        //Kthura::Throw("Actors not yet supported");
+        //cout << "Actor\n";
+        auto tx = GetTex(obj);
+        if (tx) {
+            //cout << obj->Walking() << obj->Moving() << "???\n";
+            obj->UpdateMoves();
+            TQSG_Color((byte)obj->R(), (byte)obj->G(), (byte)obj->B());
+            //TQMG.SetAlphaFloat((float)obj.Alpha1000 / 1000);
+            TQSG_SetAlpha((byte)obj->Alpha255());
+            //TQMG_RotateRAD((float)obj.RotationRadians);
+            TQSG_Rotate(obj->RotationDegrees());                        
+            //SetScale(obj->ScaleX()/1000, obj->ScaleY()/1000);
+            if (obj->AnimFrame() >= tx->Frames()) obj->AnimFrame(0);
+            tx->XDraw(obj->X() + ix - scrollx, obj->Y() + iy - scrolly, obj->AnimFrame());
+            SetScale(1, 1);
+            TQSG_RotateRAD(0);
+            TQSG_SetAlpha(255);
+        } else {
+            //CrashOnNoTex ? .Invoke($"Actor-texture '{obj.Texture}' did somehow not load?");
+            Kthura::Throw("Actor-texture '" + obj->Texture() + "' did somehow not load?");
+        }
     }
 
     void Kthura_Draw_SDL_Driver::DrawPic(KthuraObject* obj, int ix, int iy, int scrollx, int scrolly) {
@@ -150,8 +173,8 @@ namespace NSKthura{
         TQSG_Color(0, 255, 0);
         TQSG_Rect(obj->X() + ix - scrollx, obj->Y() + iy - scrolly, obj->w, obj->h);
 #else
-        TQSG_Color(obj->R, obj->G, obj->B);
-        GetTex(obj)->StretchDraw(obj->X() + ix - scrollx, obj->Y() + iy - scrolly, obj->w, obj->h);
+        TQSG_Color(obj->R(), obj->G(), obj->B());
+        GetTex(obj)->StretchDraw(obj->X() + ix - scrollx, obj->Y() + iy - scrolly, obj->W(), obj->H());
 #endif
     }
 
@@ -160,20 +183,20 @@ namespace NSKthura{
         case KthuraKind::TiledArea:
             case KthuraKind::StretchedArea:
             case KthuraKind::Zone:
-                return obj->w;
+                return obj->W();
             case KthuraKind::Obstacle:
 #ifdef Kthura_TEST_OB
                 return 50;
 #else
-                Kthura::Throw("I cannot yet see the width of an obstacle");
-                return 0;
+                //Kthura::Throw("I cannot yet see the width of an obstacle");
+                return GetTex(obj)->Width();
 #endif
             case KthuraKind::Pivot:
             case KthuraKind::CustomItem:
                 return 0;
             case KthuraKind::Actor:
-                Kthura::Throw("I cannot yet see the width of an actor");
-                return 0;
+                //Kthura::Throw("I cannot yet see the width of an actor");
+                return GetTex(obj)->Height();
             default:
                 Kthura::Throw("Unknown object kind " + obj->Kind());                
         }
@@ -185,7 +208,7 @@ namespace NSKthura{
         case KthuraKind::TiledArea:
         case KthuraKind::StretchedArea:
         case KthuraKind::Zone:
-            return obj->h;
+            return obj->H();
         case KthuraKind::Obstacle:
 #ifdef Kthura_TEST_OB
             return 50;

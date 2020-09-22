@@ -1,7 +1,7 @@
 // Lic:
 // src/Kthura_Draw.cpp
 // Kthura - Drawing engine
-// version: 20.09.01
+// version: 20.09.22
 // Copyright (C) 2020 Jeroen P. Broks
 // This software is provided 'as-is', without any express or implied
 // warranty.  In no event will the authors be held liable for any damages
@@ -39,11 +39,12 @@ namespace NSKthura {
         //foreach(KthuraObject obj in layer.ObjectDrawOrder) {
         for(auto&objid:layer._DomMap){
             auto obj=objid.second;
-            if (obj->Visible || IgnoreVisibility) {
+            if (obj->Visible() || IgnoreVisibility) {
                 // std::cout << obj->Kind() << " << Draw\n";
                 if (true) { // This looks useless now, but this routine will be used later in optimalisation to see if an object is actually on screen, and if not, ignore it.
                     if (!DrawDriver) { Kthura::Throw("I cannot draw without a DrawDriver!"); return; }
                         if (!DrawDriver->AnimReset) { Kthura::Throw("DrawDriver has no AnimReset function!"); return; }
+                        //std::cout << "Gotta Draw: " << obj->ID() << ": " << obj->Kind() << "(" << (int)obj->EKind() << ")\n";
                     switch (obj->EKind()) {
                     case KthuraKind::TiledArea:
                         obj->Animate(DrawDriver->AnimReset);
@@ -54,6 +55,7 @@ namespace NSKthura {
                         DrawDriver->DrawStretchedArea(obj, x, y, scrollx, scrolly);
                         break;
                     case KthuraKind::Obstacle:
+                        //std::cout << "_Obstacle\n";
                         obj->Animate(DrawDriver->AnimReset);
                         //KthuraEdit.Stages.DBG.Log($"Animation frame for Obstacle {obj.Tag}: {obj.AnimFrame}"); // Must be on comment if not debugging the standard editor or no compile-o!
                         DrawDriver->DrawObstacle(obj, x, y, scrollx, scrolly);
@@ -65,7 +67,8 @@ namespace NSKthura {
                     case KthuraKind::Actor: {
                         int oldx = x;
                         int oldy = y;
-                        DrawDriver->DrawActor((KthuraActor*)obj, x, y, scrollx, scrolly);
+                        //DrawDriver->DrawActor((KthuraActor*)obj, x, y, scrollx, scrolly);
+                        DrawDriver->DrawActor(obj, x, y, scrollx, scrolly);
                         actorsmoved = actorsmoved || oldx != x || oldy != y;
                         break;
                     }

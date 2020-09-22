@@ -1,7 +1,7 @@
 // Lic:
 // src/Kthura_Core.hpp
 // Kthura - Core (header)
-// version: 20.09.21
+// version: 20.09.22
 // Copyright (C) 2020 Jeroen P. Broks
 // This software is provided 'as-is', without any express or implied
 // warranty.  In no event will the authors be held liable for any damages
@@ -38,6 +38,7 @@ namespace NSKthura{
 
 	class Kthura;
 	class KthuraLayer;
+	class KthuraRegObject;
 	class KthuraObject;
 	class KthuraActor;
 	class KthuraPathFinder;
@@ -67,28 +68,25 @@ namespace NSKthura{
 		virtual std::vector<KthuraPoint> FindPath(KthuraActor* A, int x, int y) = 0;
 		bool Success = false; // Should contain 'true' if the last path finding attempt was succesful.
 	};
-	
-	class KthuraObject {
-	private:
-		//int cnt = 0;
-		int _id = 0;
-		int _x = 0, _y = 0;
-		int AnimFrameSkip = 0;
-		int _Dominance = 20;
-		std::string _Labels = "";
-		std::string _Tag = "";
-		bool _impassible = false;
-		bool _forcepassible = false;
-		double _rotrad = 0;
-		int _rotdeg = 0;
-		int _alpha1000 = 0;
-		int _alpha255 = 0;
-	protected:
-		KthuraLayer* parent;
-		std::string _Kind;
+
+	class KthuraRegObject {	
+	protected:		\
+		int _x = 0, _y = 0;\
+		int AnimFrameSkip = 0;\
+		int _Dominance = 20;\
+		std::string _Labels = "";\
+		std::string _Tag = "";\
+		bool _impassible = false;\
+		bool _forcepassible = false;\
+		double _rotrad = 0;\
+		int _rotdeg = 0;\
+		int _alpha1000 = 0;\
+		int _alpha255 = 0;\
+		KthuraLayer* parent;\
+		std::string _Kind;\
+		int _id = 0;\
 	public:
-		KthuraLayer* GetParent();
-		std::map<std::string, std::string> MetaData;
+		std::map<std::string, std::string> MetaData;\
 		std::string Texture = "";
 		bool Visible = true;
 		int w = 0, h = 0;
@@ -96,11 +94,13 @@ namespace NSKthura{
 		int R = 255, G = 255, B = 255;
 		int ScaleX = 1000, ScaleY = 1000;
 		int AnimSpeed = 0;
-		int AnimFrame = 0;
+		int AnimFrame = 0; 
+			
+		KthuraLayer* GetParent();
 		float TrueScaleX();
 		float TrueScaleY();
 		std::string Kind();
-		void Kind(std::string k,bool force=false); // Only works when kind is not yet defined! Otherwise this request will be ignored!
+		void Kind(std::string k,bool force=false);
 		KthuraKind EKind();
 		void X(int newx);
 		int X();
@@ -127,7 +127,6 @@ namespace NSKthura{
 		void Alpha255(int value);
 		int Alpha255();
 		int ID();
-		void Animate(KthuraAnimReset RESET=NULL);
 		bool IsInZone(std::string Tag);
 
 		/// <summary>
@@ -139,17 +138,24 @@ namespace NSKthura{
 		/// Deprecated! Use Alpha255 in stead.
 		/// </summary>
 		int Alpha1000();
-		static 	KthuraObject Create(std::string Kind,KthuraLayer* p);
+		//static 	KthuraObject Create(std::string Kind,KthuraLayer* p);
 		bool CheckParent(KthuraLayer* p);
-		KthuraObject();
-		KthuraObject(KthuraLayer* p); // Should only be used by derrived classes
+		KthuraRegObject();
+		KthuraRegObject(KthuraLayer* p); // Should only be used by derrived classes
+		KthuraRegObject(KthuraLayer* p, std::string setKind);
+		void PSync(KthuraActor* A);
 	};
 
-	class KthuraActor :public KthuraObject {
+	class KthuraActor{ //:public KthuraRegObject {
+		friend class KthuraRegObject;
 	private:
 		bool _InMotion=false;
 		void Walk2Move();
+		KthuraLayer* parent= NULL ;
+		std::string _Kind{ "Actor" };
+		int _id = 0;
 	public:
+		KthuraRegObject O;
 		//public object DriverTextureObject = null; // To be defined by the graphics driver for its own needs
 		std::string ChosenPic = "";
 
@@ -167,7 +173,7 @@ namespace NSKthura{
 		int FrameSpeed = 4;
 		int FrameSpeedCount = 0;
 		int WalkSpot = 0;
-		std::string Wind = "North";
+		std::string Wind{ "NORTH" };
 		int WalkingToX = 0, WalkingToY = 0;
 		//Path FoundPath = null;
 		std::vector<KthuraPoint> FoundPath;
@@ -176,18 +182,118 @@ namespace NSKthura{
 		int Cycle = -1;
 		int CWalkX();
 		int CWalkY();
+		int ID();
 		void WalkTo(int to_x, int to_y, bool real = true);
 		void WalkTo(KthuraObject* obj);
 		void WalkTo(std::string Tag);
 		void MoveTo(int x, int y);
 		void MoveTo(KthuraObject* obj);
 		void MoveTo(std::string Tag);
-		KthuraActor* Spawn(KthuraLayer* parent, std::string spot);
-		KthuraActor* Spawn(KthuraLayer* parent, int x, int y, std::string wind = "NORTH", unsigned char R = 255, unsigned char G = 255, unsigned char B = 255, unsigned char alpha = 255, int Dominance = 20);
 		void UpdateMoves();
 		std::string Kind();
 		KthuraKind EKind();
+		KthuraActor (KthuraLayer* parent, std::string spot);
+		KthuraActor (KthuraLayer* parent, KthuraObject* obj);
+		KthuraActor (KthuraLayer* parent, int x, int y, std::string wind = "NORTH", unsigned char R = 255, unsigned char G = 255, unsigned char B = 255, unsigned char alpha = 255, int Dominance = 20);
 		KthuraActor(KthuraLayer* parent);
+		KthuraLayer* GetParent();
+	};
+
+	class KthuraObject {
+		friend class KthuraObject;
+		friend class KthuraActor;
+	private:
+		KthuraRegObject* O=NULL;
+		KthuraActor* A=NULL;
+		int AnimFrameSkip;
+		int _id;
+	public:
+		// General
+		bool autokill = false;
+		//~KthuraObject();
+		void Kill();
+		KthuraObject(std::string aKind, KthuraLayer* prnt);
+		KthuraObject(KthuraActor* act);
+		KthuraObject(KthuraRegObject* obj);
+		KthuraLayer* GetParent();
+		int ID();
+		std::string MetaData(std::string key);
+		int MetaDataCount(std::string key);
+		std::string Texture();
+		bool Visible();
+		int W();
+		int H();
+		int insertx();
+		int inserty();
+		int R();
+		int G();
+		int B();
+		int ScaleX();
+		int ScaleY();
+		int AnimSpeed();
+		int AnimFrame();
+		int Alpha255();
+		int Alpha1000();
+		float TrueScaleX();
+		float TrueScaleY();
+		std::string Kind();
+		KthuraKind EKind();
+		int X();
+		int Y();
+		std::string Tag();
+		int Dominance();
+		std::string Labels();
+		bool ForcePassible();
+		bool Impassible();
+		int RotationDegrees();
+		double RotationRadians();
+		void MetaData(std::string key, std::string value);
+		void Texture(std::string value);
+		void Visible(bool value);
+		void W(int value);
+		void H(int value);
+		void insertx(int value);
+		void inserty(int value);
+		void ScaleX(int value);
+		void ScaleY(int value);
+		void AnimSpeed(int value);
+		void AnimFrame(int value);
+		void X(int value);
+		void Y(int value);
+		void Tag(std::string value);
+		void Dominance(int value);
+		void Labels(std::string value);
+		void ForcePassible(bool value);
+		void Impassible(bool value);
+		void RotationDegrees(int value);
+		void RotationRadians(double value);
+		void Alpha255(int value);
+		void Alpha1000(int value);
+		void R(int value);
+		void G(int value);
+		void B(int value);
+		
+		// Some general methods
+		void Animate(KthuraAnimReset RESET = NULL);
+		void Xp(int value);
+		void Yp(int value);
+		void Xm(int value);
+		void Ym(int value);
+		void Kind(std::string k, bool force = false);
+		bool IsInZone(std::string zone);
+		bool CheckParent(KthuraLayer* p);
+
+		// Actors only properties
+		bool Walking();
+		void Walking(bool value);
+
+		// Actors only Methods
+		void UpdateMoves();
+
+
+		// Create and import
+		static KthuraObject Create(std::string Kind, KthuraLayer* p);
+		static KthuraObject Import(KthuraActor* Act);
 	};
 	
 	class KthuraLayer{
@@ -209,6 +315,9 @@ namespace NSKthura{
 		int GridX{ 32 };
 		int GridY{ 32 };
 		std::vector<KthuraObject> Objects;
+		//std::vector<KthuraActor> Actors;
+		int CountObjects();
+		KthuraObject* ObjFIdx(int index);
 		std::map<int, KthuraObject*> GetIDMap();
 
 		KthuraObject* TagMap(std::string Tag);
@@ -229,6 +338,9 @@ namespace NSKthura{
 		void RemapID();
 		void TotalRemap();
 		void NewObject(std::string Kind);
+		void Spawn(std::string spottag, std::string ActorTag);
+		void Spawn(KthuraObject* spot, std::string ActorTag);
+		void Spawn(std::string ActorTag, int x, int y, std::string wind = "NORTH", unsigned char R = 255, unsigned char G = 255, unsigned char B = 255, unsigned char alpha = 255, int Dominance = 20);
 		void Kill(KthuraObject* O);
 		void Kill(int ID);
 		void Kill(std::string Tag);
