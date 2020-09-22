@@ -68,28 +68,25 @@ namespace NSKthura{
 		virtual std::vector<KthuraPoint> FindPath(KthuraActor* A, int x, int y) = 0;
 		bool Success = false; // Should contain 'true' if the last path finding attempt was succesful.
 	};
-	
-	class KthuraRegObject {
-	//private:
-	protected:
-		//int cnt = 0;
-		int _x = 0, _y = 0;
-		int AnimFrameSkip = 0;
-		int _Dominance = 20;
-		std::string _Labels = "";
-		std::string _Tag = "";
-		bool _impassible = false;
-		bool _forcepassible = false;
-		double _rotrad = 0;
-		int _rotdeg = 0;
-		int _alpha1000 = 0;
-		int _alpha255 = 0;
-		KthuraLayer* parent;
-		std::string _Kind;
-		int _id = 0;
+
+	class KthuraRegObject {	
+	protected:		\
+		int _x = 0, _y = 0;\
+		int AnimFrameSkip = 0;\
+		int _Dominance = 20;\
+		std::string _Labels = "";\
+		std::string _Tag = "";\
+		bool _impassible = false;\
+		bool _forcepassible = false;\
+		double _rotrad = 0;\
+		int _rotdeg = 0;\
+		int _alpha1000 = 0;\
+		int _alpha255 = 0;\
+		KthuraLayer* parent;\
+		std::string _Kind;\
+		int _id = 0;\
 	public:
-		KthuraLayer* GetParent();
-		std::map<std::string, std::string> MetaData;
+		std::map<std::string, std::string> MetaData;\
 		std::string Texture = "";
 		bool Visible = true;
 		int w = 0, h = 0;
@@ -97,11 +94,13 @@ namespace NSKthura{
 		int R = 255, G = 255, B = 255;
 		int ScaleX = 1000, ScaleY = 1000;
 		int AnimSpeed = 0;
-		int AnimFrame = 0;
+		int AnimFrame = 0; 
+			
+		KthuraLayer* GetParent();
 		float TrueScaleX();
 		float TrueScaleY();
 		std::string Kind();
-		void Kind(std::string k,bool force=false); // Only works when kind is not yet defined! Otherwise this request will be ignored!
+		void Kind(std::string k,bool force=false);
 		KthuraKind EKind();
 		void X(int newx);
 		int X();
@@ -128,7 +127,6 @@ namespace NSKthura{
 		void Alpha255(int value);
 		int Alpha255();
 		int ID();
-		//void Animate(KthuraAnimReset RESET=NULL);
 		bool IsInZone(std::string Tag);
 
 		/// <summary>
@@ -145,13 +143,19 @@ namespace NSKthura{
 		KthuraRegObject();
 		KthuraRegObject(KthuraLayer* p); // Should only be used by derrived classes
 		KthuraRegObject(KthuraLayer* p, std::string setKind);
+		void PSync(KthuraActor* A);
 	};
 
-	class KthuraActor :public KthuraRegObject {
+	class KthuraActor{ //:public KthuraRegObject {
+		friend class KthuraRegObject;
 	private:
 		bool _InMotion=false;
 		void Walk2Move();
+		KthuraLayer* parent= NULL ;
+		std::string _Kind{ "Actor" };
+		int _id = 0;
 	public:
+		KthuraRegObject O;
 		//public object DriverTextureObject = null; // To be defined by the graphics driver for its own needs
 		std::string ChosenPic = "";
 
@@ -178,6 +182,7 @@ namespace NSKthura{
 		int Cycle = -1;
 		int CWalkX();
 		int CWalkY();
+		int ID();
 		void WalkTo(int to_x, int to_y, bool real = true);
 		void WalkTo(KthuraObject* obj);
 		void WalkTo(std::string Tag);
@@ -191,10 +196,12 @@ namespace NSKthura{
 		KthuraActor (KthuraLayer* parent, KthuraObject* obj);
 		KthuraActor (KthuraLayer* parent, int x, int y, std::string wind = "NORTH", unsigned char R = 255, unsigned char G = 255, unsigned char B = 255, unsigned char alpha = 255, int Dominance = 20);
 		KthuraActor(KthuraLayer* parent);
-		
+		KthuraLayer* GetParent();
 	};
 
 	class KthuraObject {
+		friend class KthuraObject;
+		friend class KthuraActor;
 	private:
 		KthuraRegObject* O=NULL;
 		KthuraActor* A=NULL;
@@ -203,7 +210,8 @@ namespace NSKthura{
 	public:
 		// General
 		bool autokill = false;
-		~KthuraObject();
+		//~KthuraObject();
+		void Kill();
 		KthuraObject(std::string aKind, KthuraLayer* prnt);
 		KthuraObject(KthuraActor* act);
 		KthuraObject(KthuraRegObject* obj);

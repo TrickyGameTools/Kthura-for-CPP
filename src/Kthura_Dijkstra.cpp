@@ -34,8 +34,8 @@ namespace NSKthura {
         Dijkstra D;
         KAPLayer = A->GetParent();        
         //void CalculatePath(DijkstraPassible func, int startX, int startY, int endX, int endY)
-        int startx = floor(A->X() / A->GetParent()->GridX);
-        int starty = floor(A->Y() / A->GetParent()->GridY);
+        int startx = floor(A->O.X() / A->GetParent()->GridX);
+        int starty = floor(A->O.Y() / A->GetParent()->GridY);
         D.CalculatePath(KthuraAllowPassage, startx, starty, x, y);
         Success = D.Success();
         for (int i = 0; i < D.Length(); ++i) {

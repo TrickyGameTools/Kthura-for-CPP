@@ -38,13 +38,13 @@
 #define kthload_assert(condition,err) if(!(condition)) { if (!StrictLoad) continue; Throw(err); return;}
 #define kthload_case(thecase) else if (key==thecase)
 
-#define kthobjret(what)  if (A) return A->what; else return O->what
-#define kthobjretf(what) if (A) return A->what(); else return O->what()
-#define kthobjdef(what)  if (A) A->what = value; else O->what = value
-#define kthobjset(what)  if (A) A->what(value); else O->what(value)
-#define kthactdef(what)  if (!A) Kthura::Throw("Definition Actor-Only value"); A->what=value
-#define kthactret(what)  if (!A) Kthura::Throw("Trying to return from Actor-Only member"); return A->what
-#define kthactset(what)  if (!A) Kthura::Throw("Setting Actor-Only property") A->what(value);
+#define kthobjret(what)  if (A) return A->O.what; else return O->what
+#define kthobjretf(what) if (A) return A->O.what(); else return O->what()
+#define kthobjdef(what)  if (A) A->O.what = value; else O->what = value
+#define kthobjset(what)  if (A) A->O.what(value); else O->what(value)
+#define kthactdef(what)  if (!A) Kthura::Throw("Definition Actor-Only value"); else A->what=value
+#define kthactret(what)  if (!A) Kthura::Throw("Trying to return from Actor-Only member"); else return A->what
+#define kthactset(what)  if (!A) Kthura::Throw("Setting Actor-Only property") else A->what(value);
 
 
 namespace NSKthura {
@@ -88,6 +88,7 @@ namespace NSKthura {
 
     void KthuraRegObject::X(int newx) {
         _x = newx;
+        //if (!parent) Kthura::Throw("KthuraObject::X(" + to_string(newx) + "): parent is null pointer!");
         if (Kthura::AutoMap) parent->RemapDominance();
     }
     int KthuraRegObject::X() {
@@ -241,7 +242,7 @@ namespace NSKthura {
     }
     KthuraObject KthuraObject::Import(KthuraActor* Act) {
         KthuraObject ret(Act);
-        ret._id = Act->GetParent()->nextID();
+        ret._id = Act->GetParent()->nextID();        
         return ret;
     }
     bool KthuraRegObject::CheckParent(KthuraLayer* p) {
@@ -250,6 +251,10 @@ namespace NSKthura {
     KthuraRegObject::KthuraRegObject() {}
     KthuraRegObject::KthuraRegObject(KthuraLayer* p) { parent = p; _Kind = "???"; }
     KthuraRegObject::KthuraRegObject(KthuraLayer* p, std::string setKind) { parent = p; _Kind = setKind; }
+    void KthuraRegObject::PSync(KthuraActor* A) {        
+        if (&A->O != this) { Kthura::Throw("Sync error!"); }
+        parent = A->GetParent();
+    }
     Kthura* KthuraLayer::GetParent() {
         return parent;
     }
@@ -559,7 +564,7 @@ namespace NSKthura {
         //Actors.push_back(KthuraActor::Spawn(this, spottag));
         Objects.push_back(KthuraObject::Import(new KthuraActor(this, spottag)));
         Objects[Objects.size() - 1].Tag(ActorTag);
-        Objects[Objects.size() - 1].autokill = true;
+        Objects[Objects.size() - 1].autokill = true;                
         if (Kthura::AutoMap) TotalRemap();
         RemapID();
     }
@@ -595,6 +600,7 @@ namespace NSKthura {
         //}
         if (idx == -1) { Kthura::Throw("Object to kill not found!"); return; }
         auto EK = O->EKind();
+        O->Kill();
         O = NULL;
         _TagMap.clear();
         _LabelMap.clear();
@@ -616,6 +622,7 @@ namespace NSKthura {
     }
 
     void KthuraLayer::KillAllObjects() {
+        for (auto& O : Objects) O.Kill();
         _TagMap.clear();
         ID_Map.clear();
         _LabelMap.clear();
@@ -982,16 +989,20 @@ namespace NSKthura {
         return 0;
     }
 
+    int KthuraActor::ID() {
+        return _id;
+    }
+
     void KthuraActor::WalkTo(int to_x, int to_y, bool real) {
         auto gridx = GetParent()->GridX;
         auto gridy = GetParent()->GridY;
         int tox = to_x, toy = to_y;
-        int fromx = X(), fromy = Y();
+        int fromx = O.X(), fromy = O.Y();
         if (real) {
             tox = to_x / gridx;
             toy = to_y / gridy;
-            fromx = X() / gridx;
-            fromy = Y() / gridy;
+            fromx = O.X() / gridx;
+            fromy = O.Y() / gridy;
         }
         // Old C# code but not usable in this C++ version: FoundPath = Dijkstra.QuickPath(Parent.PureBlockRev, Parent.BlockMapWidth, Parent.BlockMapHeight, fromx, fromy, tox, toy);
         FoundPath = Kthura::PathFinder->FindPath(this, tox, toy);
@@ -1000,8 +1011,8 @@ namespace NSKthura {
             Walking = true;
             WalkingToX = to_x; //FoundPath.Nodes[0].x;
             WalkingToY = to_y; //FoundPath.Nodes[1].y;
-            MoveX = X();
-            MoveY = Y();
+            MoveX = O.X();
+            MoveY = O.Y();
             Walk2Move();
         } else {
             Walking = false;
@@ -1026,16 +1037,18 @@ namespace NSKthura {
         //KthuraActor ret(parent);
         //{ KthuraActor created(parent); parent->Objects.push_back(created); ret = &created; }
         auto obj = parent->TagMap(spot);
+        ret->parent = parent;
+        ret->O.PSync(this);
         ret->_id = parent->nextID();
-        ret->X(obj->X());
-        ret->Y(obj->Y());
-        ret->Dominance ( obj->Dominance());
-        ret->Alpha255(255);
-        ret->R = 255;
-        ret->G = 255;
-        ret->B = 255;
-        ret->Visible = true;
-        ret->Impassible ( false);
+        ret->O.X(obj->X());
+        ret->O.Y(obj->Y());
+        ret->O.Dominance ( obj->Dominance());
+        ret->O.Alpha255(255);
+        ret->O.R = 255;
+        ret->O.G = 255;
+        ret->O.B = 255;
+        ret->O.Visible = true;
+        ret->O.Impassible ( false);
         if (obj->MetaDataCount("Wind")) ret->Wind = obj->MetaData("Wind"); else ret->Wind = "NORTH";
         //return ret;        
     }
@@ -1044,16 +1057,18 @@ namespace NSKthura {
         //KthuraActor* ret;
         //KthuraActor created(parent); /*parent->Objects.push_back(created);*/ ret = &created; 
         auto ret = this;
+        ret->parent = parent;
+        ret->O.PSync(this);
         ret->_id = parent->nextID();
-        ret->X(obj->X());
-        ret->Y(obj->Y());
-        ret->Dominance(obj->Dominance());
-        ret->Alpha255(255);
-        ret->R = 255;
-        ret->G = 255;
-        ret->B = 255;
-        ret->Visible = true;
-        ret->Impassible(false);
+        ret->O.X(obj->X());
+        ret->O.Y(obj->Y());
+        ret->O.Dominance(obj->Dominance());
+        ret->O.Alpha255(255);
+        ret->O.R = 255;
+        ret->O.G = 255;
+        ret->O.B = 255;
+        ret->O.Visible = true;
+        ret->O.Impassible(false);
         if (obj->MetaDataCount("Wind")) ret->Wind = obj->MetaData("Wind"); else ret->Wind = "NORTH";
         //return created;
     }
@@ -1063,27 +1078,29 @@ namespace NSKthura {
         //KthuraActor* ret;
         //KthuraActor created(parent); /*parent->Objects.push_back(created);*/ ret = &created;
         //var ret = new KthuraActor(parent);
+        ret->parent = parent;
+        ret->O.PSync(this);
         ret->_id = parent->nextID();
-        ret->X(x);
-        ret->Y(y);
+        ret->O.X(x);
+        ret->O.Y(y);
         ret->Wind = wind;
-        ret->R = R;
-        ret->G = G;
-        ret->B = B;
-        ret->Alpha255(alpha);
-        ret->Dominance(Dominance);
-        ret->Visible = true;
-        ret->Impassible(false);
+        ret->O.R = R;
+        ret->O.G = G;
+        ret->O.B = B;
+        ret->O.Alpha255(alpha);
+        ret->O.Dominance(Dominance);
+        ret->O.Visible = true;
+        ret->O.Impassible(false);
         //return *ret;
     }
 
     void KthuraActor::UpdateMoves() {
         if (Moving || Walking) {
-            if (MoveX < X()) { Xm(MoveSkip); if (X() < MoveX) X(MoveX); if (AutoWind) Wind = "WEST"; }
-            if (MoveX > X()) { Xp(MoveSkip); if (X() > MoveX) X(MoveX); if (AutoWind) Wind = "EAST"; }
-            if (MoveY < Y()) { Ym(MoveSkip); if (Y() < MoveY) Y(MoveY); if (AutoWind) Wind = "NORTH"; }
-            if (MoveY > Y()) { Yp(MoveSkip); if (Y() > MoveY) Y(MoveY); if (AutoWind) Wind = "SOUTH"; }
-            if (MoveX == X() && MoveY == Y()) {
+            if (MoveX < O.X()) { O.Xm(MoveSkip); if (O.X() < MoveX) O.X(MoveX); if (AutoWind) Wind = "WEST"; }
+            if (MoveX > O.X()) { O.Xp(MoveSkip); if (O.X() > MoveX) O.X(MoveX); if (AutoWind) Wind = "EAST"; }
+            if (MoveY < O.Y()) { O.Ym(MoveSkip); if (O.Y() < MoveY) O.Y(MoveY); if (AutoWind) Wind = "NORTH"; }
+            if (MoveY > O.Y()) { O.Yp(MoveSkip); if (O.Y() > MoveY) O.Y(MoveY); if (AutoWind) Wind = "SOUTH"; }
+            if (MoveX == O.X() && MoveY == O.Y()) {
                 if (!Walking)
                     Moving = false;
                 else {
@@ -1097,16 +1114,16 @@ namespace NSKthura {
                 }
             }
         } else {
-            MoveX = X();
-            MoveY = Y();
+            MoveX = O.X();
+            MoveY = O.Y();
         }
         if ((WalkingIsInMotion && Walking) || InMotion()) {
             FrameSpeedCount++;
             if (FrameSpeedCount >= FrameSpeed) {
                 FrameSpeedCount = 0;
-                AnimFrame++;
+                O.AnimFrame++;
             }
-        } else if (WalkingIsInMotion && (!Walking)) AnimFrame = 0;    
+        } else if (WalkingIsInMotion && (!Walking)) O.AnimFrame = 0;    
     }
 
     std::string KthuraActor::Kind() { return "Actor"; }
@@ -1114,17 +1131,29 @@ namespace NSKthura {
 
 
     KthuraActor::KthuraActor(KthuraLayer* argparent){
+        
         parent = argparent;
         _Kind = "Actor";        
+    }
+
+    KthuraLayer* KthuraActor::GetParent() {
+        return parent;
     }
 
     
 
     KthuraObject::~KthuraObject() {
+        cout << "Destructor KthuraObject Called: " << Kind() << "; " << ID() << "\n";
+        /*
         if (!autokill) return;
         if (O) delete O;
         if (A) delete A;
-        autokill = false;
+        autokill = false;*/
+    }
+
+    void KthuraObject::Kill() {
+        if (O) delete O;
+        if (A) delete A;
     }
 
     KthuraObject::KthuraObject(std::string aKind, KthuraLayer* prnt) {
@@ -1144,12 +1173,12 @@ namespace NSKthura {
         if (A) return A->GetParent(); else return O->GetParent();        
     }
 
-    int KthuraObject::ID() { return _id; }
+    int KthuraObject::ID() { if (A) return A->ID(); return _id; }
     std::string KthuraObject::MetaData(std::string key) { kthobjret(MetaData[key]); }
     int KthuraObject::MetaDataCount(std::string key) { kthobjret(MetaData.count(key)); }
 
     void KthuraObject::MetaData(std::string key, std::string value) {
-        if (A) A->MetaData[key] = value; else O->MetaData[key]=value;
+        if (A) A->O.MetaData[key] = value; else O->MetaData[key]=value;
     }
 
     std::string KthuraObject::Texture() { kthobjret(Texture); }
@@ -1190,8 +1219,8 @@ namespace NSKthura {
     void KthuraObject::ScaleY(int value) { kthobjdef(ScaleX); }
     void KthuraObject::AnimSpeed(int value) { kthobjdef(AnimSpeed); }
     void KthuraObject::AnimFrame(int value) { kthobjdef(AnimFrame); }
-    void KthuraObject::X(int value) { if (A) A->X(value); else O->X(value); }
-    void KthuraObject::Y(int value) { if (A) A->Y(value); else O->Y(value); }
+    void KthuraObject::X(int value) { if (A) A->O.X(value); else O->X(value); }
+    void KthuraObject::Y(int value) { if (A) A->O.Y(value); else O->Y(value); }
     void KthuraObject::Tag(std::string value) { kthobjset(Tag); }
     void KthuraObject::Dominance(int value) { kthobjset(Dominance); }
     void KthuraObject::Labels(std::string value) { kthobjset(Labels); }
