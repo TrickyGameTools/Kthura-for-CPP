@@ -1142,16 +1142,18 @@ namespace NSKthura {
 
     
 
+        /*
     KthuraObject::~KthuraObject() {
         cout << "Destructor KthuraObject Called: " << Kind() << "; " << ID() << "\n";
-        /*
         if (!autokill) return;
         if (O) delete O;
         if (A) delete A;
-        autokill = false;*/
+        autokill = false;
     }
+        */
 
     void KthuraObject::Kill() {
+        cout << "Object kill! " << Kind() << "; " << Tag() << "; " << ID() << ";\n";
         if (O) delete O;
         if (A) delete A;
     }
@@ -1198,8 +1200,8 @@ namespace NSKthura {
     int KthuraObject::Alpha1000() { kthobjretf(Alpha1000); }
     float KthuraObject::TrueScaleX() { kthobjret(ScaleX / 1000); }
     float KthuraObject::TrueScaleY() { kthobjret(ScaleY / 1000); }
-    std::string KthuraObject::Kind() { kthobjret(Kind()); }
-    KthuraKind KthuraObject::EKind() { kthobjret(EKind()); }
+    std::string KthuraObject::Kind() { if (A) return "Actor"; return O->Kind(); }
+    KthuraKind KthuraObject::EKind() { if (A) return KthuraKind::Actor; return O->EKind(); }
     int KthuraObject::X() { kthobjretf(X); }
     int KthuraObject::Y() { kthobjretf(Y); }
     std::string KthuraObject::Tag() { kthobjretf(Tag); }
