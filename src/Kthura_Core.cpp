@@ -1131,6 +1131,8 @@ namespace NSKthura {
     int KthuraObject::Y() { kthobjretf(Y); }
     std::string KthuraObject::Tag() { kthobjretf(Tag); }
     int KthuraObject::Dominance() { kthobjretf(Dominance); }
+    std::string KthuraObject::Labels() { kthobjretf(Labels); }
+    bool KthuraObject::ForcePassible() { kthobjretf(ForcePassible); }
     void KthuraObject::Texture(std::string value) { kthobjdef(Texture); }
     void KthuraObject::Visible(bool value) { kthobjdef(Visible); }
     void KthuraObject::W(int value) { kthobjdef(w); }
@@ -1145,6 +1147,8 @@ namespace NSKthura {
     void KthuraObject::Y(int value) { if (A) A->Y(value); else O->Y(value); }
     void KthuraObject::Tag(std::string value) { kthobjset(Tag); }
     void KthuraObject::Dominance(int value) { kthobjset(Dominance); }
+    void KthuraObject::Labels(std::string value) { kthobjset(Labels); }
+    void KthuraObject::ForcePassible(bool value) { kthobjset(ForcePassible); }
 
 
 }

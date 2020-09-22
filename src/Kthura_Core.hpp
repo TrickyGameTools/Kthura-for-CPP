@@ -224,6 +224,7 @@ namespace NSKthura{
 		int X();
 		int Y();
 		std::string Tag();
+		int Dominance();
 		void MetaData(std::string key, std::string value);
 		void Texture(std::string value);
 		void Visible(bool value);
@@ -238,8 +239,14 @@ namespace NSKthura{
 		void X(int value);
 		void Y(int value);
 		void Tag(std::string value);
+		void Dominance(int value);
 
 		void Animate(KthuraAnimReset RESET = NULL);
+		void Xp(int value);
+		void Yp(int value);
+		void Xm(int value);
+		void Ym(int value);
+
 
 	};
 	
