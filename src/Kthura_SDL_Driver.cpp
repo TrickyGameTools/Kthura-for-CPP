@@ -66,11 +66,11 @@ namespace NSKthura{
         if (!Map->TexDir) {
             Kthura::Throw("No Texture JCR resource set");
             return;
-        }
-        if (!Map->TexDir->EntryExists(tex)) {
+        }        
+        if (!(Map->TexDir->EntryExists(tex) || Map->TexDir->DirectoryExists(tex))) {
             Kthura::Throw("Texture \"" + tex + "\" not found!");
             return;
-        }
+        }    
         auto Now = floor(SDL_GetTicks() / 1000);
         KSDT[tag].LastCall = Now;
         KSDT[tag].LastMapID = Map->ID();
