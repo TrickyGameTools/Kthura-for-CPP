@@ -796,7 +796,7 @@ namespace NSKthura {
                         s = Split(value, 'x');
                         kthload_assert(s.size() == 2, "SIZE syntax error!");
                         obj->W(stoi(Trim(s[0])));
-                        obj->W(stoi(Trim(s[1])));
+                        obj->H(stoi(Trim(s[1])));
                         //break;
                     } kthload_case("TAG") {
                         kthload_assert(obj, "TAG: No Object!");
@@ -1218,7 +1218,7 @@ namespace NSKthura {
     void KthuraObject::insertx(int value) { kthobjdef(insertx); }
     void KthuraObject::inserty(int value) { kthobjdef(inserty); }
     void KthuraObject::ScaleX(int value) { kthobjdef(ScaleX); }
-    void KthuraObject::ScaleY(int value) { kthobjdef(ScaleX); }
+    void KthuraObject::ScaleY(int value) { kthobjdef(ScaleY); }
     void KthuraObject::AnimSpeed(int value) { kthobjdef(AnimSpeed); }
     void KthuraObject::AnimFrame(int value) { kthobjdef(AnimFrame); }
     void KthuraObject::X(int value) { if (A) A->O.X(value); else O->X(value); }

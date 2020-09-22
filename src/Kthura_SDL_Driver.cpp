@@ -126,6 +126,7 @@ namespace NSKthura{
     }
 
     void Kthura_Draw_SDL_Driver::DrawObstacle(KthuraObject* obj, int ix, int iy, int scrollx, int scrolly) {
+        //cout << "Obstacle\n";
 #ifdef Kthura_TEST_OB
         TQSG_Color(255, 180, 0);
         for (int i = 0; i < 50; i++) TQSG_Circle(obj->X() + ix - scrollx, obj->Y() + iy - scrolly, i);
@@ -140,6 +141,7 @@ namespace NSKthura{
 
     void Kthura_Draw_SDL_Driver::DrawActor(KthuraObject* obj, int ix, int iy, int scrollx, int scrolly) {
         //Kthura::Throw("Actors not yet supported");
+        //cout << "Actor\n";
         auto tx = GetTex(obj);
         if (tx) {
             //cout << obj->Walking() << obj->Moving() << "???\n";
@@ -149,10 +151,10 @@ namespace NSKthura{
             TQSG_SetAlpha((byte)obj->Alpha255());
             //TQMG.RotateRAD((float)obj.RotationRadians);
             TQSG_Rotate(obj->RotationDegrees());                        
-            SetScale(obj->ScaleX()/1000, obj->ScaleY()/1000);
+            //SetScale(obj->ScaleX()/1000, obj->ScaleY()/1000);
             if (obj->AnimFrame() >= tx->Frames()) obj->AnimFrame(0);
             tx->XDraw(obj->X() + ix - scrollx, obj->Y() + iy - scrolly, obj->AnimFrame());
-            SetScale(1, 1);
+            //SetScale(1, 1);
             TQSG_RotateRAD(0);
             TQSG_SetAlpha(255);
         } else {

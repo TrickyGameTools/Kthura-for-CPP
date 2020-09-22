@@ -44,6 +44,7 @@ namespace NSKthura {
                 if (true) { // This looks useless now, but this routine will be used later in optimalisation to see if an object is actually on screen, and if not, ignore it.
                     if (!DrawDriver) { Kthura::Throw("I cannot draw without a DrawDriver!"); return; }
                         if (!DrawDriver->AnimReset) { Kthura::Throw("DrawDriver has no AnimReset function!"); return; }
+                        //std::cout << "Gotta Draw: " << obj->ID() << ": " << obj->Kind() << "(" << (int)obj->EKind() << ")\n";
                     switch (obj->EKind()) {
                     case KthuraKind::TiledArea:
                         obj->Animate(DrawDriver->AnimReset);
@@ -54,6 +55,7 @@ namespace NSKthura {
                         DrawDriver->DrawStretchedArea(obj, x, y, scrollx, scrolly);
                         break;
                     case KthuraKind::Obstacle:
+                        //std::cout << "_Obstacle\n";
                         obj->Animate(DrawDriver->AnimReset);
                         //KthuraEdit.Stages.DBG.Log($"Animation frame for Obstacle {obj.Tag}: {obj.AnimFrame}"); // Must be on comment if not debugging the standard editor or no compile-o!
                         DrawDriver->DrawObstacle(obj, x, y, scrollx, scrolly);
