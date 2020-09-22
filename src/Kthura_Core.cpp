@@ -1105,6 +1105,7 @@ namespace NSKthura {
     }
 
     std::string KthuraObject::MetaData(std::string key) { kthobjret(MetaData[key]); }
+    int KthuraObject::MetaDataCount(std::string key) { kthobjret(MetaData.count(key)); }
 
     void KthuraObject::MetaData(std::string key, std::string value) {
         if (A) A->MetaData[key] = value; else O->MetaData[key]=value;
@@ -1123,6 +1124,8 @@ namespace NSKthura {
     int KthuraObject::ScaleY() { kthobjret(ScaleY); }
     int KthuraObject::AnimSpeed() { kthobjret(AnimSpeed); }
     int KthuraObject::AnimFrame() { kthobjret(AnimFrame); }
+    int KthuraObject::Alpha255() { kthobjretf(Alpha255); }
+    int KthuraObject::Alpha1000() { kthobjretf(Alpha1000); }
     float KthuraObject::TrueScaleX() { kthobjret(ScaleX / 1000); }
     float KthuraObject::TrueScaleY() { kthobjret(ScaleY / 1000); }
     std::string KthuraObject::Kind() { kthobjret(Kind()); }
@@ -1133,6 +1136,8 @@ namespace NSKthura {
     int KthuraObject::Dominance() { kthobjretf(Dominance); }
     std::string KthuraObject::Labels() { kthobjretf(Labels); }
     bool KthuraObject::ForcePassible() { kthobjretf(ForcePassible); }
+    int KthuraObject::RotationDegrees() { kthobjretf(RotationDegrees); }
+    double KthuraObject::RotationRadians() { kthobjretf(RotationRadians); }
     void KthuraObject::Texture(std::string value) { kthobjdef(Texture); }
     void KthuraObject::Visible(bool value) { kthobjdef(Visible); }
     void KthuraObject::W(int value) { kthobjdef(w); }
@@ -1149,6 +1154,10 @@ namespace NSKthura {
     void KthuraObject::Dominance(int value) { kthobjset(Dominance); }
     void KthuraObject::Labels(std::string value) { kthobjset(Labels); }
     void KthuraObject::ForcePassible(bool value) { kthobjset(ForcePassible); }
+    void KthuraObject::RotationRadions(double value) { kthobjset(RotationRadians); }
+    void KthuraObject::Alpha255(int value) { kthobjset(Alpha255); }
+    void KthuraObject::Alpha1000(int value) { kthobjset(Alpha1000); }
+    void KthuraObject::RotationDegrees(int value) { kthobjset(RotationDegrees); }
 
 
 }
