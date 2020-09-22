@@ -140,7 +140,7 @@ namespace NSKthura{
 		/// Deprecated! Use Alpha255 in stead.
 		/// </summary>
 		int Alpha1000();
-		static 	KthuraObject Create(std::string Kind,KthuraLayer* p);
+		//static 	KthuraObject Create(std::string Kind,KthuraLayer* p);
 		bool CheckParent(KthuraLayer* p);
 		KthuraRegObject();
 		KthuraRegObject(KthuraLayer* p); // Should only be used by derrived classes
@@ -199,6 +199,7 @@ namespace NSKthura{
 		KthuraRegObject* O=NULL;
 		KthuraActor* A=NULL;
 		int AnimFrameSkip;
+		int _id;
 	public:
 		~KthuraObject();
 		KthuraObject(std::string aKind, KthuraLayer* prnt);
@@ -231,6 +232,7 @@ namespace NSKthura{
 		int Dominance();
 		std::string Labels();
 		bool ForcePassible();
+		bool Impassible();
 		int RotationDegrees();
 		double RotationRadians();
 		void MetaData(std::string key, std::string value);
@@ -250,10 +252,14 @@ namespace NSKthura{
 		void Dominance(int value);
 		void Labels(std::string value);
 		void ForcePassible(bool value);
+		void Impassible(bool value);
 		void RotationDegrees(int value);
-		void RotationRadions(double value);
+		void RotationRadians(double value);
 		void Alpha255(int value);
 		void Alpha1000(int value);
+		void R(int value);
+		void G(int value);
+		void B(int value);
 		
 
 		void Animate(KthuraAnimReset RESET = NULL);
@@ -261,9 +267,11 @@ namespace NSKthura{
 		void Yp(int value);
 		void Xm(int value);
 		void Ym(int value);
+		void Kind(std::string k, bool force = false);
 		bool IsInZone(std::string zone);
+		bool CheckParent(KthuraLayer* p);
 
-
+		static KthuraObject Create(std::string Kind, KthuraLayer* p);
 	};
 	
 	class KthuraLayer{
