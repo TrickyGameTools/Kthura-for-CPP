@@ -184,12 +184,12 @@ namespace NSKthura{
 		void MoveTo(int x, int y);
 		void MoveTo(KthuraObject* obj);
 		void MoveTo(std::string Tag);
-		static KthuraActor Spawn(KthuraLayer* parent, std::string spot);
-		static KthuraActor Spawn(KthuraLayer* parent, KthuraObject* obj);
-		static KthuraActor Spawn(KthuraLayer* parent, int x, int y, std::string wind = "NORTH", unsigned char R = 255, unsigned char G = 255, unsigned char B = 255, unsigned char alpha = 255, int Dominance = 20);
 		void UpdateMoves();
 		std::string Kind();
 		KthuraKind EKind();
+		KthuraActor (KthuraLayer* parent, std::string spot);
+		KthuraActor (KthuraLayer* parent, KthuraObject* obj);
+		KthuraActor (KthuraLayer* parent, int x, int y, std::string wind = "NORTH", unsigned char R = 255, unsigned char G = 255, unsigned char B = 255, unsigned char alpha = 255, int Dominance = 20);
 		KthuraActor(KthuraLayer* parent);
 		
 	};
@@ -201,8 +201,11 @@ namespace NSKthura{
 		int AnimFrameSkip;
 		int _id;
 	public:
+		bool autokill = false;
 		~KthuraObject();
 		KthuraObject(std::string aKind, KthuraLayer* prnt);
+		KthuraObject(KthuraActor* act);
+		KthuraObject(KthuraRegObject* obj);
 		KthuraLayer* GetParent();
 		int ID();
 		std::string MetaData(std::string key);
@@ -272,6 +275,7 @@ namespace NSKthura{
 		bool CheckParent(KthuraLayer* p);
 
 		static KthuraObject Create(std::string Kind, KthuraLayer* p);
+		static KthuraObject Import(KthuraActor* Act);
 	};
 	
 	class KthuraLayer{

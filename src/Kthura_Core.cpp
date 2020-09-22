@@ -233,6 +233,11 @@ namespace NSKthura {
         ret._id = p->nextID();
         return ret;
     }
+    KthuraObject KthuraObject::Import(KthuraActor* Act) {
+        KthuraObject ret(Act);
+        ret._id = Act->GetParent()->nextID();
+        return ret;
+    }
     bool KthuraRegObject::CheckParent(KthuraLayer* p) {
         return parent==p; // Should compare the memory addresses... not the values stored in them!
     }
@@ -544,24 +549,32 @@ namespace NSKthura {
         if (Kthura::AutoMap) TotalRemap();
     }
 
-    void KthuraLayer::Spawn(std::string spottag,std::string ActorTag) {
-        Actors.push_back(KthuraActor::Spawn(this, spottag));
-        Actors[Actors.size() - 1].Tag(ActorTag);
+    void KthuraLayer::Spawn(std::string spottag, std::string ActorTag) {
+        //Actors.push_back(KthuraActor::Spawn(this, spottag));
+        Objects.push_back(KthuraObject::Import(new KthuraActor(this, spottag)));
+        Objects[Objects.size() - 1].Tag(ActorTag);
+        Objects[Objects.size() - 1].autokill = true;
         if (Kthura::AutoMap) TotalRemap();
         RemapID();
     }
 
     void KthuraLayer::Spawn(KthuraObject* spot, std::string ActorTag) {
         //cout << "Spawning on: " << ActorTag << "\n";
-        Actors.push_back(KthuraActor::Spawn(this, spot));
-        Actors[Actors.size()-1].Tag(ActorTag);
+        //Actors.push_back(KthuraActor::Spawn(this, spot));
+        //Actors[Actors.size()-1].Tag(ActorTag);
+        Objects.push_back(KthuraObject::Import(new KthuraActor(this, spot)));
+        Objects[Objects.size() - 1].Tag(ActorTag);
+        Objects[Objects.size() - 1].autokill = true;
         if (Kthura::AutoMap) TotalRemap();
         RemapID();
     }
 
     void KthuraLayer::Spawn(std::string ActorTag, int x, int y, std::string wind, unsigned char R, unsigned char G, unsigned char B, unsigned char alpha, int Dominance) {
-        Actors.push_back(KthuraActor::Spawn(this, x, y, wind, R, G, B, alpha, Dominance));
-        Actors[Actors.size() - 1].Tag(ActorTag);
+        //Actors.push_back(KthuraActor::Spawn(this, x, y, wind, R, G, B, alpha, Dominance));
+        //Actors[Actors.size() - 1].Tag(ActorTag);
+        Objects.push_back(KthuraObject::Import(new KthuraActor(this,x,y,wind,R,G,B,alpha,Dominance)));
+        Objects[Objects.size() - 1].Tag(ActorTag);
+        Objects[Objects.size() - 1].autokill = true;
         if (Kthura::AutoMap) TotalRemap();
         RemapID();
     }
@@ -569,21 +582,22 @@ namespace NSKthura {
     void KthuraLayer::Kill(KthuraObject* O) {
         int idx = -1;
         if (!O->CheckParent(this)) { Kthura::Throw("Trying to kill an object that is not part of the requested layer!"); return; }
-        if (O->EKind() == KthuraKind::Actor) {
-            for (int i = 0; i < Actors.size(); ++i) if (&Actors[i] == O) idx = i;
-        } else {
+        //if (O->EKind() == KthuraKind::Actor) {
+            //for (int i = 0; i < Actors.size(); ++i) if (&Actors[i] == O) idx = i;
+        //} else {
             for (int i = 0; i < Objects.size(); ++i) if (&Objects[i] == O) idx = i;
-        }
+        //}
         if (idx == -1) { Kthura::Throw("Object to kill not found!"); return; }
+        auto EK = O->EKind();
         O = NULL;
         _TagMap.clear();
         _LabelMap.clear();
         ID_Map.clear();        
-        if (O->EKind() == KthuraKind::Actor) {
-            Actors.erase(Actors.begin() + idx);
-        } else {
+        //if (EK == KthuraKind::Actor) {
+//            Actors.erase(Actors.begin() + idx);
+  //      } else {
             Objects.erase(Objects.begin() + idx);
-        }
+    //    }
         if (Kthura::AutoMap) TotalRemap();
     }
 
@@ -601,7 +615,7 @@ namespace NSKthura {
         _LabelMap.clear();
         _BlockMap.clear();
         Objects.clear();
-        Actors.clear();
+        //Actors.clear();
         TotalRemap(); // Just an extra safety pre-caution.
     }
 
@@ -1001,27 +1015,29 @@ namespace NSKthura {
     void KthuraActor::MoveTo(KthuraObject* obj) { MoveTo(obj->X(), obj->Y()); }
     void KthuraActor::MoveTo(std::string Tag) { MoveTo(GetParent()->TagMap(Tag)); }
 
-    KthuraActor KthuraActor::Spawn(KthuraLayer* parent, string spot) {
-        KthuraActor ret(parent);
+    KthuraActor::KthuraActor (KthuraLayer* parent, string spot) {
+        auto ret = this;
+        //KthuraActor ret(parent);
         //{ KthuraActor created(parent); parent->Objects.push_back(created); ret = &created; }
         auto obj = parent->TagMap(spot);
-        ret._id = parent->nextID();
-        ret.X(obj->X());
-        ret.Y(obj->Y());
-        ret.Dominance ( obj->Dominance());
-        ret.Alpha255(255);
-        ret.R = 255;
-        ret.G = 255;
-        ret.B = 255;
-        ret.Visible = true;
-        ret.Impassible ( false);
-        if (obj->MetaDataCount("Wind")) ret.Wind = obj->MetaData("Wind"); else ret.Wind = "NORTH";
-        return ret;        
+        ret->_id = parent->nextID();
+        ret->X(obj->X());
+        ret->Y(obj->Y());
+        ret->Dominance ( obj->Dominance());
+        ret->Alpha255(255);
+        ret->R = 255;
+        ret->G = 255;
+        ret->B = 255;
+        ret->Visible = true;
+        ret->Impassible ( false);
+        if (obj->MetaDataCount("Wind")) ret->Wind = obj->MetaData("Wind"); else ret->Wind = "NORTH";
+        //return ret;        
     }
 
-    KthuraActor KthuraActor::Spawn(KthuraLayer* parent, KthuraObject* obj) {
-        KthuraActor* ret;
-        KthuraActor created(parent); /*parent->Objects.push_back(created);*/ ret = &created; 
+    KthuraActor::KthuraActor(KthuraLayer* parent, KthuraObject* obj) {
+        //KthuraActor* ret;
+        //KthuraActor created(parent); /*parent->Objects.push_back(created);*/ ret = &created; 
+        auto ret = this;
         ret->_id = parent->nextID();
         ret->X(obj->X());
         ret->Y(obj->Y());
@@ -1033,13 +1049,13 @@ namespace NSKthura {
         ret->Visible = true;
         ret->Impassible(false);
         if (obj->MetaDataCount("Wind")) ret->Wind = obj->MetaData("Wind"); else ret->Wind = "NORTH";
-        return created;
+        //return created;
     }
 
-    KthuraActor KthuraActor::Spawn(KthuraLayer* parent, int x, int y, std::string wind, unsigned char R, unsigned char G, unsigned char B, unsigned char alpha, int Dominance) {
-        KthuraActor* ret;
-        KthuraActor created(parent); /*parent->Objects.push_back(created);*/ ret = &created;
-
+    KthuraActor::KthuraActor(KthuraLayer* parent, int x, int y, std::string wind, unsigned char R, unsigned char G, unsigned char B, unsigned char alpha, int Dominance) {
+        auto ret = this;
+        //KthuraActor* ret;
+        //KthuraActor created(parent); /*parent->Objects.push_back(created);*/ ret = &created;
         //var ret = new KthuraActor(parent);
         ret->_id = parent->nextID();
         ret->X(x);
@@ -1052,7 +1068,7 @@ namespace NSKthura {
         ret->Dominance(Dominance);
         ret->Visible = true;
         ret->Impassible(false);
-        return *ret;
+        //return *ret;
     }
 
     void KthuraActor::UpdateMoves() {
@@ -1090,6 +1106,7 @@ namespace NSKthura {
     std::string KthuraActor::Kind() { return "Actor"; }
     KthuraKind KthuraActor::EKind() { return KthuraKind::Actor; }
 
+
     KthuraActor::KthuraActor(KthuraLayer* argparent){
         parent = argparent;
         _Kind = "Actor";        
@@ -1098,13 +1115,23 @@ namespace NSKthura {
     
 
     KthuraObject::~KthuraObject() {
+        if (!autokill) return;
         if (O) delete O;
         if (A) delete A;
+        autokill = false;
     }
 
     KthuraObject::KthuraObject(std::string aKind, KthuraLayer* prnt) {
         if (aKind == "Actor") { A = new KthuraActor(prnt); }
         else { O = new KthuraRegObject(prnt,aKind); }
+    }
+
+    KthuraObject::KthuraObject(KthuraActor* act) {
+        A = act;
+    }
+
+    KthuraObject::KthuraObject(KthuraRegObject* obj) {
+        O = obj;
     }
 
     KthuraLayer* KthuraObject::GetParent() {
