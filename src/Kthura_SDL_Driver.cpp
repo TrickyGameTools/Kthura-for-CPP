@@ -142,6 +142,7 @@ namespace NSKthura{
         //Kthura::Throw("Actors not yet supported");
         auto tx = GetTex(obj);
         if (tx) {
+            cout << obj->Walking << obj->Moving << "???\n";
             obj->UpdateMoves();
             TQSG_Color((byte)obj->R, (byte)obj->G, (byte)obj->B);
             //TQMG.SetAlphaFloat((float)obj.Alpha1000 / 1000);

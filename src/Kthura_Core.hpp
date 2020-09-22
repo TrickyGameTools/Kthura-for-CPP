@@ -38,6 +38,7 @@ namespace NSKthura{
 
 	class Kthura;
 	class KthuraLayer;
+	class KthuraRegObject;
 	class KthuraObject;
 	class KthuraActor;
 	class KthuraPathFinder;
@@ -68,10 +69,10 @@ namespace NSKthura{
 		bool Success = false; // Should contain 'true' if the last path finding attempt was succesful.
 	};
 	
-	class KthuraObject {
-	private:
+	class KthuraRegObject {
+	//private:
+	protected:
 		//int cnt = 0;
-		int _id = 0;
 		int _x = 0, _y = 0;
 		int AnimFrameSkip = 0;
 		int _Dominance = 20;
@@ -83,9 +84,9 @@ namespace NSKthura{
 		int _rotdeg = 0;
 		int _alpha1000 = 0;
 		int _alpha255 = 0;
-	protected:
 		KthuraLayer* parent;
 		std::string _Kind;
+		int _id = 0;
 	public:
 		KthuraLayer* GetParent();
 		std::map<std::string, std::string> MetaData;
@@ -127,7 +128,7 @@ namespace NSKthura{
 		void Alpha255(int value);
 		int Alpha255();
 		int ID();
-		void Animate(KthuraAnimReset RESET=NULL);
+		//void Animate(KthuraAnimReset RESET=NULL);
 		bool IsInZone(std::string Tag);
 
 		/// <summary>
@@ -141,11 +142,12 @@ namespace NSKthura{
 		int Alpha1000();
 		static 	KthuraObject Create(std::string Kind,KthuraLayer* p);
 		bool CheckParent(KthuraLayer* p);
-		KthuraObject();
-		KthuraObject(KthuraLayer* p); // Should only be used by derrived classes
+		KthuraRegObject();
+		KthuraRegObject(KthuraLayer* p); // Should only be used by derrived classes
+		KthuraRegObject(KthuraLayer* p, std::string setKind);
 	};
 
-	class KthuraActor :public KthuraObject {
+	class KthuraActor :public KthuraRegObject {
 	private:
 		bool _InMotion=false;
 		void Walk2Move();
@@ -167,7 +169,7 @@ namespace NSKthura{
 		int FrameSpeed = 4;
 		int FrameSpeedCount = 0;
 		int WalkSpot = 0;
-		std::string Wind = "North";
+		std::string Wind{ "NORTH" };
 		int WalkingToX = 0, WalkingToY = 0;
 		//Path FoundPath = null;
 		std::vector<KthuraPoint> FoundPath;
@@ -182,12 +184,63 @@ namespace NSKthura{
 		void MoveTo(int x, int y);
 		void MoveTo(KthuraObject* obj);
 		void MoveTo(std::string Tag);
-		KthuraActor* Spawn(KthuraLayer* parent, std::string spot);
-		KthuraActor* Spawn(KthuraLayer* parent, int x, int y, std::string wind = "NORTH", unsigned char R = 255, unsigned char G = 255, unsigned char B = 255, unsigned char alpha = 255, int Dominance = 20);
+		static KthuraActor Spawn(KthuraLayer* parent, std::string spot);
+		static KthuraActor Spawn(KthuraLayer* parent, KthuraObject* obj);
+		static KthuraActor Spawn(KthuraLayer* parent, int x, int y, std::string wind = "NORTH", unsigned char R = 255, unsigned char G = 255, unsigned char B = 255, unsigned char alpha = 255, int Dominance = 20);
 		void UpdateMoves();
 		std::string Kind();
 		KthuraKind EKind();
 		KthuraActor(KthuraLayer* parent);
+		
+	};
+
+	class KthuraObject {
+	private:
+		KthuraRegObject* O=NULL;
+		KthuraActor* A=NULL;
+		int AnimFrameSkip;
+	public:
+		~KthuraObject();
+		KthuraObject(std::string aKind, KthuraLayer* prnt);
+		KthuraLayer* GetParent();
+		std::string MetaData(std::string key);
+		std::string Texture();
+		bool Visible();
+		int W();
+		int H();
+		int insertx();
+		int inserty();
+		int R();
+		int G();
+		int B();
+		int ScaleX();
+		int ScaleY();
+		int AnimSpeed();
+		int AnimFrame();
+		float TrueScaleX();
+		float TrueScaleY();
+		std::string Kind();
+		KthuraKind EKind();
+		int X();
+		int Y();
+		std::string Tag();
+		void MetaData(std::string key, std::string value);
+		void Texture(std::string value);
+		void Visible(bool value);
+		void W(int value);
+		void H(int value);
+		void insertx(int value);
+		void inserty(int value);
+		void ScaleX(int value);
+		void ScaleY(int value);
+		void AnimSpeed(int value);
+		void AnimFrame(int value);
+		void X(int value);
+		void Y(int value);
+		void Tag(std::string value);
+
+		void Animate(KthuraAnimReset RESET = NULL);
+
 	};
 	
 	class KthuraLayer{
@@ -209,6 +262,9 @@ namespace NSKthura{
 		int GridX{ 32 };
 		int GridY{ 32 };
 		std::vector<KthuraObject> Objects;
+		//std::vector<KthuraActor> Actors;
+		int CountObjects();
+		//KthuraObject* ObjFIdx(int index);
 		std::map<int, KthuraObject*> GetIDMap();
 
 		KthuraObject* TagMap(std::string Tag);
@@ -229,6 +285,9 @@ namespace NSKthura{
 		void RemapID();
 		void TotalRemap();
 		void NewObject(std::string Kind);
+		void Spawn(std::string spottag, std::string ActorTag);
+		void Spawn(KthuraObject* spot, std::string ActorTag);
+		void Spawn(std::string ActorTag, int x, int y, std::string wind = "NORTH", unsigned char R = 255, unsigned char G = 255, unsigned char B = 255, unsigned char alpha = 255, int Dominance = 20);
 		void Kill(KthuraObject* O);
 		void Kill(int ID);
 		void Kill(std::string Tag);
