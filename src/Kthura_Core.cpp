@@ -190,6 +190,7 @@ namespace NSKthura {
     }
 
     void KthuraObject::Ym(int value) { kthobjset(Ym); }
+    bool KthuraObject::IsInZone(string zone) { kthobjret(IsInZone(zone)); }
     void KthuraObject::Xm(int value) { kthobjset(Xm); }
     void KthuraObject::Yp(int value) { kthobjset(Yp); }
     void KthuraObject::Xp(int value) { kthobjset(Xp); }
@@ -242,25 +243,25 @@ namespace NSKthura {
         return idinc++; // dirty code!
     }
     int KthuraLayer::CountObjects() {
-        return Objects.size() + Actors.size();
+        return Objects.size();// +Actors.size();
     }
-    KthuraRegObject* KthuraLayer::ObjFIdx(int index) {
-        int aindex = index - Objects.size();
-        cout << "DEBUG OBJFIDX: Object Index: " << index << "/"<<Objects.size()<<"; Actor Index: " << aindex << "/"<<Actors.size()<<".\n";
+    KthuraObject* KthuraLayer::ObjFIdx(int index) {
+        //int aindex = index - Objects.size();
+        //cout << "DEBUG OBJFIDX: Object Index: " << index << "/"<<Objects.size()<<"; Actor Index: " << aindex << "/"<<Actors.size()<<".\n";
         if (index < Objects.size())
             return &Objects[index];
-        else if (aindex < Actors.size())
-            return &Actors[index];
+        //else if (aindex < Actors.size())
+        //    return &Actors[index];
         return NULL;
     }
-    std::map<int, KthuraRegObject*> KthuraLayer::GetIDMap() {
+    std::map<int, KthuraObject*> KthuraLayer::GetIDMap() {
         if (ID_Map.size() == 0) {
             RemapDominance();
             RemapID();
         }
         return ID_Map;
     }
-    KthuraRegObject* KthuraLayer::TagMap(std::string Tag) {
+    KthuraObject* KthuraLayer::TagMap(std::string Tag) {
         if (_TagMap.count(Tag)) return _TagMap[Tag];
         Kthura::Throw("There is no object tagged: " + Tag);
         return nullptr;
@@ -275,12 +276,12 @@ namespace NSKthura {
         return ret;
     }
 
-    std::vector<KthuraRegObject*>* KthuraLayer::LabelMap(std::string label) {
+    std::vector<KthuraObject*>* KthuraLayer::LabelMap(std::string label) {
         if (_LabelMap.count(label)) return &_LabelMap[label];
-        return &std::vector<KthuraRegObject*>();
+        return &std::vector<KthuraObject*>();
     }
 
-    KthuraRegObject* KthuraLayer::LastObject() {
+    KthuraObject* KthuraLayer::LastObject() {
         return &Objects[Objects.size()-1];
     }
 
@@ -1085,7 +1086,7 @@ namespace NSKthura {
 
     KthuraActor::KthuraActor(KthuraLayer* argparent){
         parent = argparent;
-        _Kind = "Actor";
+        _Kind = "Actor";        
     }
 
     
@@ -1103,6 +1104,8 @@ namespace NSKthura {
     KthuraLayer* KthuraObject::GetParent() {
         if (A) return A->GetParent(); else return O->GetParent();        
     }
+
+    int KthuraObject::ID() { kthobjretf(ID); }
 
     std::string KthuraObject::MetaData(std::string key) { kthobjret(MetaData[key]); }
     int KthuraObject::MetaDataCount(std::string key) { kthobjret(MetaData.count(key)); }

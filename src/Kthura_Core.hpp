@@ -203,6 +203,7 @@ namespace NSKthura{
 		~KthuraObject();
 		KthuraObject(std::string aKind, KthuraLayer* prnt);
 		KthuraLayer* GetParent();
+		int ID();
 		std::string MetaData(std::string key);
 		int MetaDataCount(std::string key);
 		std::string Texture();
@@ -219,6 +220,7 @@ namespace NSKthura{
 		int AnimSpeed();
 		int AnimFrame();
 		int Alpha255();
+		int Alpha1000();
 		float TrueScaleX();
 		float TrueScaleY();
 		std::string Kind();
@@ -251,6 +253,7 @@ namespace NSKthura{
 		void RotationDegrees(int value);
 		void RotationRadions(double value);
 		void Alpha255(int value);
+		void Alpha1000(int value);
 		
 
 		void Animate(KthuraAnimReset RESET = NULL);
@@ -258,6 +261,7 @@ namespace NSKthura{
 		void Yp(int value);
 		void Xm(int value);
 		void Ym(int value);
+		bool IsInZone(std::string zone);
 
 
 	};
@@ -283,7 +287,7 @@ namespace NSKthura{
 		std::vector<KthuraObject> Objects;
 		//std::vector<KthuraActor> Actors;
 		int CountObjects();
-		//KthuraObject* ObjFIdx(int index);
+		KthuraObject* ObjFIdx(int index);
 		std::map<int, KthuraObject*> GetIDMap();
 
 		KthuraObject* TagMap(std::string Tag);
