@@ -75,7 +75,7 @@ namespace NSKthura{
         KSDT[tag].LastCall = Now;
         KSDT[tag].LastMapID = Map->ID();
         KSDT[tag].Img.Create(*(Map->TexDir), tex);
-        if (prefixed(tag, "Obstacle::")) KSDT[tag].Img.HotBottomCenter();
+        if (prefixed(tag, "Obstacle::")||prefixed(tag,"Actor::")) KSDT[tag].Img.HotBottomCenter();
         // remove texture which were not used in a too long time.
         actions = (actions + 1) % 250;
         if (!actions) {
@@ -134,7 +134,7 @@ namespace NSKthura{
         TQSG_Color(obj->R(), obj->G(), obj->B());
         auto oldr = TQSG_Rotate();
         TQSG_Rotate(obj->RotationDegrees());
-        GetTex(obj)->XDraw(obj->X(), obj->Y(),obj->AnimFrame());
+        GetTex(obj)->XDraw(obj->X()+ix-scrollx, obj->Y()+iy-scrolly,obj->AnimFrame());
         TQSG_Rotate(oldr);
 #endif
     }
@@ -213,15 +213,16 @@ namespace NSKthura{
 #ifdef Kthura_TEST_OB
             return 50;
 #else
-            Kthura::Throw("I cannot yet see the width of an obstacle");
-            return 0;
+            //Kthura::Throw("I cannot yet see the width of an obstacle");
+            return GetTex(obj)->Height();
+            
 #endif
         case KthuraKind::Pivot:
         case KthuraKind::CustomItem:
             return 0;
         case KthuraKind::Actor:
-            Kthura::Throw("I cannot yet see the width of an actor");
-            return 0;
+            //Kthura::Throw("I cannot yet see the width of an actor");
+            return GetTex(obj)->Height();
         default:
             Kthura::Throw("Unknown object kind " + obj->Kind());
         }
