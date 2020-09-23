@@ -1,7 +1,7 @@
 // Lic:
 // src/Kthura_Core.cpp
 // Kthura - Core
-// version: 20.09.22
+// version: 20.09.24
 // Copyright (C) 2020 Jeroen P. Broks
 // This software is provided 'as-is', without any express or implied
 // warranty.  In no event will the authors be held liable for any damages
@@ -203,6 +203,13 @@ namespace NSKthura {
     bool KthuraObject::CheckParent(KthuraLayer* p) { kthobjret(CheckParent(p)); }
     bool KthuraObject::Walking() { kthactret(Walking); }
     void KthuraObject::Walking(bool value) { kthactdef(Walking); }
+    void KthuraObject::MoveTo(int x, int y) { if (!A) Kthura::Throw("Actors-Only method: UpdateMoves()"); A->MoveTo(x,y); }
+    void KthuraObject::MoveTo(KthuraObject* obj) { if (!A) Kthura::Throw("Actors-Only method: UpdateMoves()"); A->MoveTo(obj); }
+    void KthuraObject::MoveTo(std::string ObjTag) { MoveTo(GetParent()->TagMap(ObjTag)); }
+    void KthuraObject::WalkTo(int x, int y, bool real) { if (!A) Kthura::Throw("Actors-Only method: UpdateMoves()"); A->WalkTo(x, y, real); }
+    void KthuraObject::WalkTo(KthuraObject* obj) { if (!A) Kthura::Throw("Actors-Only method: UpdateMoves()"); A->WalkTo(obj); }
+    void KthuraObject::WalkTo(std::string ObjTag) { WalkTo(GetParent()->TagMap(ObjTag)); }
+    bool KthuraObject::Moving() { return A && A->Moving; }
     void KthuraObject::UpdateMoves() { if (!A) Kthura::Throw("Actors-Only method: UpdateMoves()"); A->UpdateMoves(); }
     void KthuraObject::Xm(int value) { kthobjset(Xm); }
     void KthuraObject::Yp(int value) { kthobjset(Yp); }
@@ -258,8 +265,12 @@ namespace NSKthura {
     Kthura* KthuraLayer::GetParent() {
         return parent;
     }
-    void KthuraLayer::SetParent(Kthura* prnt) {
+    void KthuraLayer::SetParent(Kthura* prnt,std::string lname) {
+        _layername = lname;
         if (!parent) parent = prnt;
+    }
+    std::string KthuraLayer::GetCreationName() {
+        return _layername;
     }
     int KthuraLayer::nextID() {
         return idinc++; // dirty code!
@@ -285,6 +296,9 @@ namespace NSKthura {
     }
     KthuraObject* KthuraLayer::TagMap(std::string Tag) {
         if (_TagMap.count(Tag)) return _TagMap[Tag];
+        //for (auto lck : parent->Layers) std::cout << "Layer: " << lck.first << "; check: " << (&lck.second == this) << "!";
+        std::cout << "Error in layer: '" << GetCreationName() << "'\n";
+        for (auto& dbg : _TagMap) std::cout << "TagNotFound - CheckUp: " << dbg.second->Kind() << " " << dbg.first << "\n";
         Kthura::Throw("There is no object tagged: " + Tag);
         return nullptr;
     }
@@ -652,7 +666,7 @@ namespace NSKthura {
                 return;
             }
         }
-        Layers[lay].SetParent(this);
+        Layers[lay].SetParent(this,lay);
         Layers[lay].TotalRemap();
     }
     void Kthura::KillLayer(std::string lay) {
@@ -743,7 +757,7 @@ namespace NSKthura {
                         obj = NULL;
                         curlayername = value;
                         curlayer = &Layers[value];
-                        curlayer->SetParent(this);
+                        curlayer->SetParent(this,curlayername);
 #ifdef Kthura_LoadChat
                         cout << "LAYER is now: " << value << "\n";
 #endif

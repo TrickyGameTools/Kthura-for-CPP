@@ -1,7 +1,7 @@
 // Lic:
 // src/Kthura_Core.hpp
 // Kthura - Core (header)
-// version: 20.09.22
+// version: 20.09.24
 // Copyright (C) 2020 Jeroen P. Broks
 // This software is provided 'as-is', without any express or implied
 // warranty.  In no event will the authors be held liable for any damages
@@ -286,6 +286,13 @@ namespace NSKthura{
 		// Actors only properties
 		bool Walking();
 		void Walking(bool value);
+		void MoveTo(int x, int y);
+		void MoveTo(KthuraObject* obj);
+		void MoveTo(std::string ObjTag);
+		void WalkTo(int x, int y,bool real=true);
+		void WalkTo(KthuraObject* obj);
+		void WalkTo(std::string ObjTag);
+		bool Moving();
 
 		// Actors only Methods
 		void UpdateMoves();
@@ -299,6 +306,7 @@ namespace NSKthura{
 	class KthuraLayer{
 	private:
 		Kthura* parent=NULL;
+		std::string _layername; // Extra verification
 		std::map<std::string, KthuraObject*> _TagMap;
 		std::map<std::string, std::vector<KthuraObject*>> _LabelMap;		
 		std::vector<bool> _BlockMap;
@@ -310,7 +318,8 @@ namespace NSKthura{
 		int idinc = 0;
 	public:
 		Kthura* GetParent();
-		void SetParent(Kthura* prnt);
+		void SetParent(Kthura* prnt,std::string lname);
+		std::string GetCreationName();
 		int nextID();
 		int GridX{ 32 };
 		int GridY{ 32 };
