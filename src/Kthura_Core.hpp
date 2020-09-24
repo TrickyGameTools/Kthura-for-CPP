@@ -286,16 +286,18 @@ namespace NSKthura{
 		// Actors only properties
 		bool Walking();
 		void Walking(bool value);
+		void NotInMotionThen0(bool value);
+		bool Moving();
+		bool NotInMotionThen0();
+
+		// Actors only Methods
+		void UpdateMoves();
 		void MoveTo(int x, int y);
 		void MoveTo(KthuraObject* obj);
 		void MoveTo(std::string ObjTag);
 		void WalkTo(int x, int y,bool real=true);
 		void WalkTo(KthuraObject* obj);
 		void WalkTo(std::string ObjTag);
-		bool Moving();
-
-		// Actors only Methods
-		void UpdateMoves();
 
 
 		// Create and import

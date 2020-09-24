@@ -203,6 +203,7 @@ namespace NSKthura {
     bool KthuraObject::CheckParent(KthuraLayer* p) { kthobjret(CheckParent(p)); }
     bool KthuraObject::Walking() { kthactret(Walking); }
     void KthuraObject::Walking(bool value) { kthactdef(Walking); }
+    void KthuraObject::NotInMotionThen0(bool value) { kthactdef(NotInMotionThen0); }
     void KthuraObject::MoveTo(int x, int y) { if (!A) Kthura::Throw("Actors-Only method: UpdateMoves()"); A->MoveTo(x,y); }
     void KthuraObject::MoveTo(KthuraObject* obj) { if (!A) Kthura::Throw("Actors-Only method: UpdateMoves()"); A->MoveTo(obj); }
     void KthuraObject::MoveTo(std::string ObjTag) { MoveTo(GetParent()->TagMap(ObjTag)); }
@@ -210,6 +211,7 @@ namespace NSKthura {
     void KthuraObject::WalkTo(KthuraObject* obj) { if (!A) Kthura::Throw("Actors-Only method: UpdateMoves()"); A->WalkTo(obj); }
     void KthuraObject::WalkTo(std::string ObjTag) { WalkTo(GetParent()->TagMap(ObjTag)); }
     bool KthuraObject::Moving() { return A && A->Moving; }
+    bool KthuraObject::NotInMotionThen0() { kthactret(NotInMotionThen0); }
     void KthuraObject::UpdateMoves() { if (!A) Kthura::Throw("Actors-Only method: UpdateMoves()"); A->UpdateMoves(); }
     void KthuraObject::Xm(int value) { kthobjset(Xm); }
     void KthuraObject::Yp(int value) { kthobjset(Yp); }
@@ -1129,7 +1131,7 @@ namespace NSKthura {
             }
         } else {
             MoveX = O.X();
-            MoveY = O.Y();
+            MoveY = O.Y(); 
         }
         if ((WalkingIsInMotion && Walking) || InMotion()) {
             FrameSpeedCount++;
@@ -1137,7 +1139,7 @@ namespace NSKthura {
                 FrameSpeedCount = 0;
                 O.AnimFrame++;
             }
-        } else if (WalkingIsInMotion && (!Walking)) O.AnimFrame = 0;    
+        } else if (WalkingIsInMotion && (!Walking) && (NotInMotionThen0)) O.AnimFrame = 0;
     }
 
     std::string KthuraActor::Kind() { return "Actor"; }
