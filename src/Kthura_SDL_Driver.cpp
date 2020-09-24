@@ -151,7 +151,7 @@ namespace NSKthura{
             TQSG_SetAlpha((byte)obj->Alpha255());
             //TQMG_RotateRAD((float)obj.RotationRadians);
             TQSG_Rotate(obj->RotationDegrees());                        
-            //SetScale(obj->ScaleX()/1000, obj->ScaleY()/1000);
+            SetScale(obj->ScaleX()/1000, obj->ScaleY()/1000);
             if (obj->AnimFrame() >= tx->Frames()) obj->AnimFrame(0);
             tx->XDraw(obj->X() + ix - scrollx, obj->Y() + iy - scrolly, obj->AnimFrame());
             SetScale(1, 1);
