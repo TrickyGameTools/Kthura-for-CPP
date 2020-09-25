@@ -690,7 +690,7 @@ namespace NSKthura {
     }
 
     bool Kthura::StrictLoad = true;
-    void Kthura::Load(jcr6::JT_Dir& sourcedir, std::string Prefix) {
+    void Kthura::Load(jcr6::JT_Dir& sourcedir, std::string Prefix) {        
         if (!sourcedir.EntryExists(Prefix + "Objects")) { Throw(Prefix + "Objects has not been found in JCR6 resource!"); return; }
         if (!sourcedir.EntryExists(Prefix + "Data")) { Throw(Prefix + "Objects has not been found in JCR6 resource!"); return; }
         /*Debug stuff that is not really suitable for C++ but kept for reference's sake!
