@@ -285,10 +285,12 @@ namespace NSKthura{
 
 		// Actors only properties
 		bool Walking();
-		void Walking(bool value);
-		void NotInMotionThen0(bool value);
 		bool Moving();
 		bool NotInMotionThen0();
+		std::string Wind();
+		void Walking(bool value);
+		void NotInMotionThen0(bool value);
+		void Wind(std::string value);
 
 		// Actors only Methods
 		void UpdateMoves();

@@ -204,6 +204,7 @@ namespace NSKthura {
     bool KthuraObject::Walking() { kthactret(Walking); }
     void KthuraObject::Walking(bool value) { kthactdef(Walking); }
     void KthuraObject::NotInMotionThen0(bool value) { kthactdef(NotInMotionThen0); }
+    void KthuraObject::Wind(std::string value) { kthactdef(Wind); }
     void KthuraObject::MoveTo(int x, int y) { if (!A) Kthura::Throw("Actors-Only method: UpdateMoves()"); A->MoveTo(x,y); }
     void KthuraObject::MoveTo(KthuraObject* obj) { if (!A) Kthura::Throw("Actors-Only method: UpdateMoves()"); A->MoveTo(obj); }
     void KthuraObject::MoveTo(std::string ObjTag) { MoveTo(GetParent()->TagMap(ObjTag)); }
@@ -212,6 +213,7 @@ namespace NSKthura {
     void KthuraObject::WalkTo(std::string ObjTag) { WalkTo(GetParent()->TagMap(ObjTag)); }
     bool KthuraObject::Moving() { return A && A->Moving; }
     bool KthuraObject::NotInMotionThen0() { kthactret(NotInMotionThen0); }
+    string KthuraObject::Wind() { kthactret(Wind); }
     void KthuraObject::UpdateMoves() { if (!A) Kthura::Throw("Actors-Only method: UpdateMoves()"); A->UpdateMoves(); }
     void KthuraObject::Xm(int value) { kthobjset(Xm); }
     void KthuraObject::Yp(int value) { kthobjset(Yp); }
