@@ -27,7 +27,7 @@
 #include "Kthura_Core.hpp"
 #include "Kthura_Draw.hpp"
 
-#define Kthura_LoadChat
+#undef Kthura_LoadChat
 
 #ifdef Kthura_LoadChat
     #define KLC(msg) std::cout<< "Kthura_LoadChat: "<< (msg) <<"\n"
