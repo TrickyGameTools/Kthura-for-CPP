@@ -19,7 +19,13 @@
 // EndLic
 
 #include "Kthura_Dijkstra.hpp"
-// TODO Code
+
+#undef Dijkstra_Debug
+
+#ifdef Dijkstra_Debug
+#include <iostream>
+using std::cout;
+#endif
 
 
 namespace NSKthura {
@@ -29,21 +35,66 @@ namespace NSKthura {
         return !KAPLayer->Blocked(x, y);
     }
 
-    std::vector<KthuraPoint> Kthura_Dijkstra::FindPath(KthuraActor* A, int x, int y) {
+    std::vector<KthuraPoint> Kthura_Dijkstra::FindPath(KthuraObject* A, int x, int y) {
         std::vector<KthuraPoint> ret;
         Dijkstra D;
         KAPLayer = A->GetParent();        
         //void CalculatePath(DijkstraPassible func, int startX, int startY, int endX, int endY)
-        int startx = floor(A->O.X() / A->GetParent()->GridX);
-        int starty = floor(A->O.Y() / A->GetParent()->GridY);
+        int startx = floor(A->X() / KAPLayer->GridX);
+        int starty = floor(A->Y() / KAPLayer->GridY);
         D.CalculatePath(KthuraAllowPassage, startx, starty, x, y);
         Success = D.Success();
         for (int i = 0; i < D.Length(); ++i) {
-            KthuraPoint P;
+            KthuraPoint P(A->GetParent());
             P.GX(D.Node(i).x);
             P.GY(D.Node(i).y);
             ret.push_back(P);
         }
+        return ret;
+    }
+
+    std::vector<KthuraPoint> Kthura_Dijkstra::FindPath(int AX, int AY, KthuraLayer* Lay, int x, int y) {
+        std::vector<KthuraPoint> ret;
+        Dijkstra D;
+        KAPLayer = Lay;// A->GetParent();
+        //void CalculatePath(DijkstraPassible func, int startX, int startY, int endX, int endY)
+        int startx = AX; // floor(AX / KAPLayer->GridX);
+        int starty = AY; // floor(AY / KAPLayer->GridY);
+        D.CalculatePath(KthuraAllowPassage, startx, starty, x, y);
+        Success = D.Success();
+#ifdef Dijkstra_Debug
+        cout << "Dijkstra debug - succes: " << Success << "; Length: " << D.Length() <<  "("<<startx<<","<<starty<<") -> ("<<x<<","<<y<<")  \n";
+#endif
+        for (int i = 0; i < D.Length(); ++i) {
+            KthuraPoint P(KAPLayer);
+            P.GX(D.Node(i).x);
+            P.GY(D.Node(i).y);
+            ret.push_back(P);
+#ifdef Dijkstra_Debug
+            cout << "Dijkstra debug: Node #" << i << " (" << P.XX() << "(" << P.GX() << "), " << P.XY() << "(" << P.GY() << "))\n";
+#endif
+        }
+#ifdef Dijkstra_Debug
+        for (int iy = 0; iy < 50; iy++){
+            printf("%02d> ", iy);
+            for (int ix = 0; ix < 50; ix++) {
+                if (KAPLayer->Blocked(ix, iy)) {
+                    if (KthuraAllowPassage(ix, iy)) cout << "\x1b[31m";
+                    cout << "X\x1b[0m";
+                } else {
+                    bool found = false;
+                    for (int i = 0; i < D.Length(); ++i) {
+                        if (D.Node(i).x == ix && D.Node(i).y == iy) {
+                            found = true;
+                            cout << "\x1b[32m*\x1b[0m";
+                        }
+                    }
+                    if (!found) cout << " ";
+                }
+            }
+                cout << std::endl;
+        }
+#endif
         return ret;
     }
 }

@@ -253,7 +253,12 @@ namespace NSKthura {
     }
     KthuraObject KthuraObject::Import(KthuraActor* Act) {
         KthuraObject ret(Act);
-        ret._id = Act->GetParent()->nextID();        
+        ret._id = Act->GetParent()->nextID();  
+        Act->SetObject(&ret);        
+        cout << "Debug: Actor imported on layer: " << ret.A->GetParent()->GetCreationName() << endl;
+        cout << "Debug: Extra check: " << ret.GetParent()->GetCreationName() << endl;
+        if (ret.GetParent() != ret.A->GetParent()) cout << "DEBUG: \x7 WOWOWOWOW! Parent mismatch!" << endl;
+        if (&ret != Act->GetObject()) cout << "DEBUG: \x7 WOWOWOW! Object data not in order!" << endl;
         return ret;
     }
     bool KthuraRegObject::CheckParent(KthuraLayer* p) {
@@ -582,7 +587,7 @@ namespace NSKthura {
         //Actors.push_back(KthuraActor::Spawn(this, spottag));
         Objects.push_back(KthuraObject::Import(new KthuraActor(this, spottag)));
         Objects[Objects.size() - 1].Tag(ActorTag);
-        Objects[Objects.size() - 1].autokill = true;                
+        //Objects[Objects.size() - 1].autokill = true;                        
         if (Kthura::AutoMap) TotalRemap();
         RemapID();
     }
@@ -593,7 +598,7 @@ namespace NSKthura {
         //Actors[Actors.size()-1].Tag(ActorTag);
         Objects.push_back(KthuraObject::Import(new KthuraActor(this, spot)));
         Objects[Objects.size() - 1].Tag(ActorTag);
-        Objects[Objects.size() - 1].autokill = true;
+        //Objects[Objects.size() - 1].autokill = true;
         if (Kthura::AutoMap) TotalRemap();
         RemapID();
     }
@@ -603,7 +608,7 @@ namespace NSKthura {
         //Actors[Actors.size() - 1].Tag(ActorTag);
         Objects.push_back(KthuraObject::Import(new KthuraActor(this,x,y,wind,R,G,B,alpha,Dominance)));
         Objects[Objects.size() - 1].Tag(ActorTag);
-        Objects[Objects.size() - 1].autokill = true;
+        //Objects[Objects.size() - 1].autokill = true;
         if (Kthura::AutoMap) TotalRemap();
         RemapID();
     }
@@ -944,17 +949,23 @@ namespace NSKthura {
 
     
 
+    KthuraPoint::KthuraPoint() {    }
+
+    KthuraPoint::KthuraPoint(KthuraLayer* parent) { this->parent = parent; }
+
     void KthuraPoint::GX(int v) {
         _grix = v;
         _exax = floor((v * parent->GridX) + (parent->GridX / 2));
     }
 
     void KthuraPoint::GY(int v) {
+        if (!parent) { Kthura::Throw("Kthura point without parent!"); return; }
         _griy = v;
-        _exax = floor((v * parent->GridY) + (parent->GridY));
+        _exay = floor((v * parent->GridY) + (parent->GridY));
     }
 
     void KthuraPoint::XX(int v) {
+        if (!parent) { Kthura::Throw("Kthura point without parent!"); return; }
         _exax = v;
         _grix = floor(v / parent->GridX);
     }
@@ -1012,6 +1023,8 @@ namespace NSKthura {
     }
 
     void KthuraActor::WalkTo(int to_x, int to_y, bool real) {
+        cout << "KthuraActor." << GetParent()->GetCreationName() <<"::WalkTo(" << to_x << "," << to_y << "," << real << ")!\n";
+        cout << "Start point: (" << O.X() << "," << O.Y() << ")\n";
         auto gridx = GetParent()->GridX;
         auto gridy = GetParent()->GridY;
         int tox = to_x, toy = to_y;
@@ -1022,8 +1035,10 @@ namespace NSKthura {
             fromx = O.X() / gridx;
             fromy = O.Y() / gridy;
         }
+        cout << "Calc (if applicable): >> (" << fromx << "," << fromy << ") -> (" << tox << "," << toy << ")    grid: " << gridx << "x" << gridy << "\n";
         // Old C# code but not usable in this C++ version: FoundPath = Dijkstra.QuickPath(Parent.PureBlockRev, Parent.BlockMapWidth, Parent.BlockMapHeight, fromx, fromy, tox, toy);
-        FoundPath = Kthura::PathFinder->FindPath(this, tox, toy);
+        //FoundPath = Kthura::PathFinder->FindPath(parentobj, tox, toy);
+        FoundPath = Kthura::PathFinder->FindPath(fromx, fromy, GetParent(), tox, toy);
         if (Kthura::PathFinder->Success) { //if (FoundPath.Success) {
             PathIndex = 0;
             Walking = true;
@@ -1055,7 +1070,7 @@ namespace NSKthura {
         //KthuraActor ret(parent);
         //{ KthuraActor created(parent); parent->Objects.push_back(created); ret = &created; }
         auto obj = parent->TagMap(spot);
-        ret->parent = parent;
+        ret->parent = parent;        
         ret->O.PSync(this);
         ret->_id = parent->nextID();
         ret->O.X(obj->X());
@@ -1158,6 +1173,10 @@ namespace NSKthura {
         return parent;
     }
 
+    KthuraObject* KthuraActor::GetObject() { return parentobj; }
+
+    void KthuraActor::SetObject(KthuraObject* o) { parentobj = o; }
+
     
 
         /*
@@ -1171,9 +1190,11 @@ namespace NSKthura {
         */
 
     void KthuraObject::Kill() {
-        cout << "Object kill! " << Kind() << "; " << Tag() << "; " << ID() << ";\n";
+        // cout << "Object kill! " << Kind() << "; " << Tag() << "; " << ID() << ";\n";
         if (O) delete O;
         if (A) delete A;
+        O = NULL;
+        A = NULL;
     }
 
     KthuraObject::KthuraObject(std::string aKind, KthuraLayer* prnt) {

@@ -26,7 +26,8 @@ namespace NSKthura {
 	using namespace TrickyUnits;
 
 	class Kthura_Dijkstra :public KthuraPathFinder {
-		std::vector<KthuraPoint> FindPath(KthuraActor* A, int x, int y);
+		std::vector<KthuraPoint> FindPath(KthuraObject* A, int x, int y);
+		std::vector<KthuraPoint> FindPath(int AX, int AY, KthuraLayer* Lay, int x, int y);
 	};
 
 }

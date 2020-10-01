@@ -53,6 +53,8 @@ namespace NSKthura{
 		int _grix = 0;
 		int _griy = 0;
 	public:
+		KthuraPoint();
+		KthuraPoint(KthuraLayer* parent);
 		void GX(int v);
 		void GY(int v);
 		void XX(int v);
@@ -65,7 +67,8 @@ namespace NSKthura{
 
 	class KthuraPathFinder {
 	public:
-		virtual std::vector<KthuraPoint> FindPath(KthuraActor* A, int x, int y) = 0;
+		virtual std::vector<KthuraPoint> FindPath(KthuraObject* A, int x, int y) = 0;
+		virtual std::vector<KthuraPoint> FindPath(int AX, int AY, KthuraLayer* Lay, int x, int y) = 0;
 		bool Success = false; // Should contain 'true' if the last path finding attempt was succesful.
 	};
 
@@ -152,6 +155,7 @@ namespace NSKthura{
 		bool _InMotion=false;
 		void Walk2Move();
 		KthuraLayer* parent= NULL ;
+		KthuraObject* parentobj = NULL;
 		std::string _Kind{ "Actor" };
 		int _id = 0;
 	public:
@@ -197,6 +201,8 @@ namespace NSKthura{
 		KthuraActor (KthuraLayer* parent, int x, int y, std::string wind = "NORTH", unsigned char R = 255, unsigned char G = 255, unsigned char B = 255, unsigned char alpha = 255, int Dominance = 20);
 		KthuraActor(KthuraLayer* parent);
 		KthuraLayer* GetParent();
+		KthuraObject* GetObject();
+		void SetObject(KthuraObject* o);
 	};
 
 	class KthuraObject {
