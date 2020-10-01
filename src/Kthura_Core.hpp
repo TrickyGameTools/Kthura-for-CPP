@@ -364,6 +364,11 @@ namespace NSKthura{
 		void Kill(int ID);
 		void Kill(std::string Tag);
 		void KillAllObjects();
+		void HideByLabel(std::string label);
+		void ShowByLabel(std::string label);
+		void HideButLabel(std::string label);
+		void ShowButLabel(std::string label);
+		std::string LabelMapDump();
 	};
 	
 	class Kthura {
