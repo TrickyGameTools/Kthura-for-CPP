@@ -212,6 +212,31 @@ namespace NSKthura {
         return X() >= zone->X() && Y() >= zone->Y() && X() <= zone->X() + zone->W() && Y() <= zone->Y() + zone->H();
     }
     bool KthuraObject::CheckParent(KthuraLayer* p) { kthobjret(CheckParent(p)); }
+
+    bool KthuraObject::PixInObj(int x, int y) {
+        switch (EKind()) {
+        case KthuraKind::Zone:
+        case KthuraKind::TiledArea:
+        case KthuraKind::StretchedArea:
+            return (x >= X() && x <= X() + W() && y >= Y() && y <= Y() + H());
+        case KthuraKind::Actor:
+        case KthuraKind::Obstacle:
+        {
+            int hw = floor(KthuraDraw::DrawDriver->ObjectWidth(this) / 2);
+            int hh = floor(KthuraDraw::DrawDriver->ObjectHeight(this) / 2);
+            int sx = X() - hw;
+            int sy = Y() - hh;
+            int ex = X() + hw;
+            int ey = Y() + hh;
+            return (x >= sx && x <= ex && y >= sx && y <= ey);
+        }
+        case KthuraKind::Pic:
+            return (x >= X() && Y() >= Y() && X() <= X() + KthuraDraw::DrawDriver->ObjectWidth(this) && Y() <= Y() + KthuraDraw::DrawDriver->ObjectHeight(this));
+        default:
+            return false;
+        }
+    }
+
     bool KthuraObject::Walking() { kthactret(Walking); }
     void KthuraObject::Walking(bool value) { kthactdef(Walking); }
     void KthuraObject::NotInMotionThen0(bool value) { kthactdef(NotInMotionThen0); }

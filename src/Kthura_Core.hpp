@@ -288,6 +288,7 @@ namespace NSKthura{
 		void Kind(std::string k, bool force = false);
 		bool IsInZone(std::string zone);
 		bool CheckParent(KthuraLayer* p);
+		bool PixInObj(int x, int y);
 
 		// Actors only properties
 		bool Walking();
@@ -349,7 +350,7 @@ namespace NSKthura{
 		
 		bool HasTag(std::string Tag);
 		bool Blocked(int x, int y);
-		bool BlockedPix(int x, int y);
+		bool BlockedPix(int x, int y);		
 		void RemapDominance();
 		void RemapTags();
 		void RemapLabels();
