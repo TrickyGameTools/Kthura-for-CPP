@@ -396,8 +396,8 @@ namespace NSKthura {
         //for (auto& Obj : Objects) {
         for (int i = 0; i < CountObjects(); i++) {
             auto Obj = ObjFIdx(i);
-            char str[35];
-            sprintf_s(str, "%010d:%010d:%010d", Obj->Dominance(), Obj->Y(), Obj->X());
+            char str[50];
+            sprintf_s(str, "%010d:%010d:%010d:%010d", Obj->Dominance(), Obj->Y(), Obj->X(),Obj->ID());
             _DomMap[str] = Obj;
         }
     }
