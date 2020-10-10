@@ -289,6 +289,7 @@ namespace NSKthura{
 		bool IsInZone(std::string zone);
 		bool CheckParent(KthuraLayer* p);
 		bool PixInObj(int x, int y);
+		std::string PixArea(); // debug only
 
 		// Actors only properties
 		bool Walking();
@@ -358,6 +359,7 @@ namespace NSKthura{
 		void RemapID();
 		void TotalRemap();
 		void NewObject(std::string Kind);
+		KthuraObject* RNewObject(std::string Kind);
 		void Spawn(std::string spottag, std::string ActorTag);
 		void Spawn(KthuraObject* spot, std::string ActorTag);
 		void Spawn(std::string ActorTag, int x, int y, std::string wind = "NORTH", unsigned char R = 255, unsigned char G = 255, unsigned char B = 255, unsigned char alpha = 255, int Dominance = 20);

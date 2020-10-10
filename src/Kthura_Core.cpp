@@ -223,12 +223,13 @@ namespace NSKthura {
         case KthuraKind::Obstacle:
         {
             int hw = floor(KthuraDraw::DrawDriver->ObjectWidth(this) / 2);
-            int hh = floor(KthuraDraw::DrawDriver->ObjectHeight(this) / 2);
+            int hh = floor(KthuraDraw::DrawDriver->ObjectHeight(this) );
             int sx = X() - hw;
             int sy = Y() - hh;
             int ex = X() + hw;
-            int ey = Y() + hh;
-            return (x >= sx && x <= ex && y >= sx && y <= ey);
+            int ey = Y();
+            //cout << "Check (" << x << "," << y << ") within (" << sx << "," << sy << ")-(" << ex << "," << ey << ") >> " << (x >= sx && x <= ex && y >= sy && y <= ey) << "\n";
+            return (x >= sx && x <= ex && y >= sy && y <= ey);
         }
         case KthuraKind::Pic:
             return (x >= X() && Y() >= Y() && X() <= X() + KthuraDraw::DrawDriver->ObjectWidth(this) && Y() <= Y() + KthuraDraw::DrawDriver->ObjectHeight(this));
@@ -236,6 +237,32 @@ namespace NSKthura {
             return false;
         }
     }
+
+    std::string KthuraObject::PixArea() {
+        switch (EKind()) {
+        case KthuraKind::Zone:
+        case KthuraKind::TiledArea:
+        case KthuraKind::StretchedArea:
+            return "A:("+to_string(X())+","+to_string(Y())+") - (" + to_string(X()+W()) + "," + to_string(Y()+H()) + ")";
+        case KthuraKind::Actor:
+        case KthuraKind::Obstacle:
+        {
+            int hw = floor(KthuraDraw::DrawDriver->ObjectWidth(this) / 2);
+            int hh = floor(KthuraDraw::DrawDriver->ObjectHeight(this));
+            int sx = X() - hw;
+            int sy = Y() - hh;
+            int ex = X() + hw;
+            int ey = Y();
+            return "O:(" + to_string(sx) + "," + to_string(sy) + ") - (" + to_string(ex) + "," + to_string(ey) + ")";
+        }
+        case KthuraKind::Pic:
+            return "Pic not yet supported";
+        default:
+            return "No PixArea suppoed for "+Kind();
+        }
+    }
+
+    
 
     bool KthuraObject::Walking() { kthactret(Walking); }
     void KthuraObject::Walking(bool value) { kthactdef(Walking); }
@@ -608,6 +635,7 @@ namespace NSKthura {
     }
 
     void KthuraLayer::TotalRemap() {
+        RemapID();
         RemapDominance();
         RemapTags();
         RemapLabels();
@@ -617,6 +645,12 @@ namespace NSKthura {
     void KthuraLayer::NewObject(std::string Kind) {
         Objects.push_back(KthuraObject::Create(Kind, this));
         if (Kthura::AutoMap) TotalRemap();
+    }
+
+    KthuraObject* KthuraLayer::RNewObject(std::string Kind) {
+        NewObject(Kind);
+        TotalRemap();
+        return &Objects[Objects.size() - 1];
     }
 
     void KthuraLayer::Spawn(std::string spottag, std::string ActorTag) {
