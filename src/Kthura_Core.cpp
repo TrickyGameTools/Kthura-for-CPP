@@ -262,6 +262,20 @@ namespace NSKthura {
         }
     }
 
+    std::string KthuraObject::DumpData() {
+        string ret{ "" };
+        cout << "Receiving from " <<Kind()<<" "<< Tag() << ":"<<ID()<<"\n";
+        if (EKind() == KthuraKind::Actor) {
+            return "";
+        }
+
+        auto md = &(O->MetaData);
+        for (auto fy : *md) {
+            ret += fy.first + " = " + fy.second+"\n";
+        }
+        return ret;
+    }
+
     
 
     bool KthuraObject::Walking() { kthactret(Walking); }

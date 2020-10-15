@@ -290,6 +290,7 @@ namespace NSKthura{
 		bool CheckParent(KthuraLayer* p);
 		bool PixInObj(int x, int y);
 		std::string PixArea(); // debug only
+		std::string DumpData(); // debug only
 
 		// Actors only properties
 		bool Walking();
