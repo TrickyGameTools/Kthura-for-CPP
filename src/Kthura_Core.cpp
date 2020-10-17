@@ -530,6 +530,7 @@ namespace NSKthura {
                             //    for (AY = TY; AY < TH; AY++) {
                             try {
                                 //Kthura.EDITTORLOG($"Blocking {AX},{AY}");
+                                //cout <<"IMPASSIBLE: "<< O.Kind() << ": " << O.Tag() << " (" << O.X() << "," << O.Y() << ") " << O.W() << "x" << O.H() << " fordata X(" << AX << ":" << TX << ":" << TW << ") Y(" << AY << ":" << TY << ":" << TH << ")\n";
                                 _BlockMap[AX + (AY * (BoundX + 1))] = true;
                             } catch (...) {
                                 //throw new Exception($"BlockMap[{AX},{AY}]: Out of bounds ({BlockMap.GetLength(0)}x{BlockMap.GetLength(1)})");
@@ -578,7 +579,7 @@ namespace NSKthura {
                 X = O.X(); if (X < 0) X = 0;
                 Y = O.Y(); if (Y < 0) Y = 0;
                 W = O.W() - 1; if (W < 0) W = 0;
-                H = O.W() - 1; if (H < 0) H = 0;
+                H = O.H() - 1; if (H < 0) H = 0;
                 switch (O.EKind()) {
                 case KthuraKind::TiledArea:
                 case KthuraKind::Zone:
@@ -595,6 +596,7 @@ namespace NSKthura {
                             //    for (AY = TY; AY < TH; AY++) {
                             try {
                                 //Kthura.EDITTORLOG($"Blocking {AX},{AY}");
+                                //cout << "FCPASSIBLE: " << O.Kind() << ": " << O.Tag() << " (" << O.X() << "," << O.Y() << ") " << O.W() << "x" << O.H() << " fordata X(" << AX << ":" << TX << ":" << TW << ") Y(" << AY << ":" << TY << ":" << TH << ")\n";
                                 _BlockMap[AX + (AY * (BoundX + 1))] = false;
                             } catch (...) {
                                 //throw new Exception($"BlockMap[{AX},{AY}]: Out of bounds ({BlockMap.GetLength(0)}x{BlockMap.GetLength(1)})");
