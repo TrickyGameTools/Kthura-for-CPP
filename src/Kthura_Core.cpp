@@ -1218,6 +1218,7 @@ namespace NSKthura {
         ret->O.B = 255;
         ret->O.Visible = true;
         ret->O.Impassible ( false);
+        ret->O.Labels(obj->Labels());
         if (obj->MetaDataCount("Wind")) ret->Wind = obj->MetaData("Wind"); else ret->Wind = "NORTH";
         //return ret;        
     }
@@ -1238,6 +1239,7 @@ namespace NSKthura {
         ret->O.B = 255;
         ret->O.Visible = true;
         ret->O.Impassible(false);
+        ret->O.Labels(obj->Labels());
         if (obj->MetaDataCount("Wind")) ret->Wind = obj->MetaData("Wind"); else ret->Wind = "NORTH";
         //return created;
     }
