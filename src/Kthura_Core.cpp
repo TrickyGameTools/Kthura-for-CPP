@@ -778,6 +778,16 @@ namespace NSKthura {
         HideByLabel(label);
     }
 
+    void KthuraLayer::RemoveActors() {
+        std::vector<KthuraObject*> Dodenlijst;
+        for (auto& O : Objects) {
+            if (O.EKind() == KthuraKind::Actor) {
+                Dodenlijst.push_back(&O);
+            }
+        }
+        for (auto& Slachtoffer : Dodenlijst) Kill(Slachtoffer);
+    }
+
     std::string KthuraLayer::LabelMapDump() {
         std::string ret = "";
         for (auto tl : _LabelMap) {
@@ -1057,6 +1067,10 @@ namespace NSKthura {
         for (auto ti : Layers) {
             Layer(ti.first)->TotalRemap();
         }
+    }
+
+    void Kthura::RemoveActors() {
+        for (auto& Layer : Layers) Layer.second.RemoveActors();
     }
 
     void Kthura::Throw(std::string err) {
@@ -1355,6 +1369,16 @@ namespace NSKthura {
     int KthuraObject::ID() { if (A) return A->ID(); return _id; }
     std::string KthuraObject::MetaData(std::string key) { kthobjret(MetaData[key]); }
     int KthuraObject::MetaDataCount(std::string key) { kthobjret(MetaData.count(key)); }
+
+    std::vector<std::string> KthuraObject::MetaDataFields() {
+        vector<std::string> ret;
+        if (A) {
+            for (auto it : A->O.MetaData) ret.push_back(it.first);
+        } else {
+            for (auto it : O.MetaData) ret.push_back(it.first);
+        }
+        return ret;
+    }
 
     void KthuraObject::MetaData(std::string key, std::string value) {
         if (A) A->O.MetaData[key] = value; else O->MetaData[key]=value;

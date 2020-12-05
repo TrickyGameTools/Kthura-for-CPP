@@ -225,6 +225,7 @@ namespace NSKthura{
 		int ID();
 		std::string MetaData(std::string key);
 		int MetaDataCount(std::string key);
+		std::vector<std::string>MetaDataFields();
 		std::string Texture();
 		bool Visible();
 		int W();
@@ -372,6 +373,7 @@ namespace NSKthura{
 		void ShowByLabel(std::string label);
 		void HideButLabel(std::string label);
 		void ShowButLabel(std::string label);
+		void RemoveActors();
 		std::string LabelMapDump();
 	};
 	
@@ -392,6 +394,8 @@ namespace NSKthura{
 		void Load(jcr6::JT_Dir& JCR, std::string Prefix = "");
 		void Load(std::string JCR, std::string Prefix = "");
 		void Remap();
+		// This feature removes all actors on ALL layers
+		void RemoveActors();
 		static void Throw(std::string err);
 		/// <summary>
 		/// Should Kthura have an error, this function will be executed *if* it's been defined. If it's not defined it will merely put a message on the console. 
