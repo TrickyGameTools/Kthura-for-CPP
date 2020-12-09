@@ -1375,7 +1375,7 @@ namespace NSKthura {
         if (A) {
             for (auto it : A->O.MetaData) ret.push_back(it.first);
         } else {
-            for (auto it : O.MetaData) ret.push_back(it.first);
+            for (auto it : O->MetaData) ret.push_back(it.first);
         }
         return ret;
     }
