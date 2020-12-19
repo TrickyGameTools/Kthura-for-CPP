@@ -280,6 +280,7 @@ namespace NSKthura {
 
     bool KthuraObject::Walking() { kthactret(Walking); }
     void KthuraObject::Walking(bool value) { kthactdef(Walking); }
+    void KthuraObject::Moving(bool value) { kthactdef(Moving); }
     void KthuraObject::NotInMotionThen0(bool value) { kthactdef(NotInMotionThen0); }
     void KthuraObject::Wind(std::string value) { kthactdef(Wind); }
     void KthuraObject::MoveTo(int x, int y) { if (!A) Kthura::Throw("Actors-Only method: UpdateMoves()"); A->MoveTo(x, y); }
@@ -887,7 +888,7 @@ namespace NSKthura {
                 else if (l == "__END")
                     readlayers = false;
                 else if (readlayers)
-                    Layers[l].GridX += 0; // Just forces to create the layer... Had to do something!
+                    Layers[Upper(l)].GridX += 0; // Just forces to create the layer... Had to do something!
                 else if (l == "NEW") {
                     //obj = new KthuraRegObject("?", ret.Layers[curlayername]);
                     Layers[curlayername].NewObject("??");
@@ -910,7 +911,7 @@ namespace NSKthura {
                         // Layer as a whole
                     if (key == "LAYER") { //kthload_case("LAYER":
                         obj = NULL;
-                        curlayername = value;
+                        curlayername = Upper(value);
                         curlayer = &Layers[value];
                         curlayer->SetParent(this,curlayername);
 #ifdef Kthura_LoadChat

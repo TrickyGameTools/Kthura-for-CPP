@@ -299,6 +299,7 @@ namespace NSKthura{
 		bool NotInMotionThen0();
 		std::string Wind();
 		void Walking(bool value);
+		void Moving(bool value);
 		void NotInMotionThen0(bool value);
 		void Wind(std::string value);
 
