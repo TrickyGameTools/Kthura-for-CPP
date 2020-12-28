@@ -798,6 +798,9 @@ namespace NSKthura {
         return ret;
     }
 
+    int KthuraLayer::BlockMapWidth() { return BM_W; }
+    int KthuraLayer::BlockMapHeight() { return BM_H; }
+
     
 
 
@@ -843,8 +846,10 @@ namespace NSKthura {
         MetaData.clear();
     }
 
+    bool Kthura::AutoAttachJCRForTex{ false };
     bool Kthura::StrictLoad = true;
     void Kthura::Load(jcr6::JT_Dir& sourcedir, std::string Prefix) {        
+        if (AutoAttachJCRForTex) this->TexDir = &sourcedir;
         if (!sourcedir.EntryExists(Prefix + "Objects")) { Throw(Prefix + "Objects has not been found in JCR6 resource!"); return; }
         if (!sourcedir.EntryExists(Prefix + "Data")) { Throw(Prefix + "Objects has not been found in JCR6 resource!"); return; }
         /*Debug stuff that is not really suitable for C++ but kept for reference's sake!
@@ -887,12 +892,17 @@ namespace NSKthura {
                     readlayers = true;
                 else if (l == "__END")
                     readlayers = false;
-                else if (readlayers)
-                    Layers[Upper(l)].GridX += 0; // Just forces to create the layer... Had to do something!
-                else if (l == "NEW") {
+                else if (readlayers) {
+                    this->NewLayer(Upper(l)); // Better?
+                    //Layers[Upper(l)].GridX += 0; // Just forces to create the layer... Had to do something!
+                    //Layers[Upper(l)].SetParent(this, Upper(l));
+#ifdef Kthura_LoadChat
+                    cout << "Created layer: " << l << " >> " << Upper(l) << endl;
+#endif
+                } else if (l == "NEW") {
                     //obj = new KthuraRegObject("?", ret.Layers[curlayername]);
-                    Layers[curlayername].NewObject("??");
-                    obj = Layers[curlayername].LastObject();
+                    Layers[Upper(curlayername)].NewObject("??");
+                    obj = Layers[Upper(curlayername)].LastObject();
                     //chat($"New object in {curlayername}");
                 } else {
                     auto pi = l.find_first_of('=', 0); if (pi < 0) {

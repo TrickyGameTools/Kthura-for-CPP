@@ -41,9 +41,9 @@ namespace NSKthura{
     using namespace TrickyUnits;
     using namespace std;
 
-    TQSG_Image* GetTex(KthuraObject* obj);
+    static TQSG_Image* GetTex(KthuraObject* obj);
 
-    void SDL_AnimReset(KthuraObject * O){
+    static void SDL_AnimReset(KthuraObject * O){
         auto Tex = GetTex(O);
         if (O->AnimFrame() >= Tex->Frames()) O->AnimFrame(0);
     }
@@ -56,7 +56,7 @@ namespace NSKthura{
 
     map<string, TKSDT> KSDT; // Kthura SDL Driver Textures
 
-    void LoadTex(string tag,string tex,Kthura*Map){
+    static void LoadTex(string tag,string tex,Kthura*Map){
         static int actions = 0;
         cout << "Load Tex " << tex << " onto tag " << tag << "\n";
         if (!Map) {
@@ -96,6 +96,9 @@ namespace NSKthura{
         auto lay = obj->GetParent();
         auto map = lay->GetParent();
         // cout << "Addr.Lay = " << lay << "; Addr.Map = " << map << "\n";
+        if (!map) {
+            cout << "\7\x1b[31mERROR!\x1b[0m\t Map=nullptr!\t (Debug: Lay:" << (int)lay << "." << lay->GetCreationName() << "; Obj:" << (int)obj << " OK:" << obj->Kind() << "; OTex:" << obj->Texture() << ")\n";
+        }
         if (!KSDT.count(Tag))
             LoadTex(Tag, obj->Texture(),map);
         if (!KSDT.count(Tag)) {

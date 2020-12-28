@@ -376,6 +376,8 @@ namespace NSKthura{
 		void ShowButLabel(std::string label);
 		void RemoveActors();
 		std::string LabelMapDump();
+		int BlockMapWidth();
+		int BlockMapHeight();
 	};
 	
 	class Kthura {
@@ -408,6 +410,7 @@ namespace NSKthura{
 		/// When set to false, instructions in mapfiles not understood will be ignored. Other wise errors will be reported based on the panic setting!
 		/// </summary>
 		static bool StrictLoad;
+		static bool AutoAttachJCRForTex;
 		int ID();
 		Kthura();
 		~Kthura();
