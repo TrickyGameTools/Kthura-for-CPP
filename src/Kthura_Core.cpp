@@ -1052,6 +1052,7 @@ namespace NSKthura {
                         if (prefixed(key, "DATA.")) {
                             auto _Key = Trim(key.substr(5));
                             kthload_assert(obj, key+": No object");
+                            //cout << "Set Data '" << _Key << "' => '" << Trim(value) << endl;
                             obj->MetaData(_Key, Trim(value));
                         }
                         if (!StrictLoad) {
@@ -1378,8 +1379,8 @@ namespace NSKthura {
     }
 
     int KthuraObject::ID() { if (A) return A->ID(); return _id; }
-    std::string KthuraObject::MetaData(std::string key) { kthobjret(MetaData[key]); }
-    int KthuraObject::MetaDataCount(std::string key) { kthobjret(MetaData.count(key)); }
+    std::string KthuraObject::MetaData(std::string key) { kthobjret(MetaData[Upper(key)]); }
+    int KthuraObject::MetaDataCount(std::string key) { kthobjret(MetaData.count(Upper(key))); }
 
     std::vector<std::string> KthuraObject::MetaDataFields() {
         vector<std::string> ret;
@@ -1392,7 +1393,7 @@ namespace NSKthura {
     }
 
     void KthuraObject::MetaData(std::string key, std::string value) {
-        if (A) A->O.MetaData[key] = value; else O->MetaData[key]=value;
+        if (A) A->O.MetaData[key] = value; else O->MetaData[Upper(key)]=value;
     }
 
     std::string KthuraObject::Texture() { kthobjret(Texture); }
