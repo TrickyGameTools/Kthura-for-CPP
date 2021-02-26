@@ -123,8 +123,10 @@ namespace NSKthura{
         TQSG_Color(255, 0, 0);
         TQSG_Rect(obj->X() + ix-scrollx, obj->Y() + iy-scrolly, obj->w, obj->h);
 #else
+        TQSG_SetBlend(TQSG_Blend::ALPHA);
+        TQSG_SetAlpha(obj->Alpha255());
         TQSG_Color(obj->R(), obj->G(), obj->B());
-        GetTex(obj)->Tile(obj->X() + ix - scrollx, obj->Y() + iy - scrolly, obj->W(), obj->H(),obj->AnimFrame(),obj->insertx(),obj->inserty());        
+        GetTex(obj)->Tile(obj->X() + ix - scrollx, obj->Y() + iy - scrolly, obj->W(), obj->H(),obj->AnimFrame(),-obj->insertx(),-obj->inserty());        
 #endif
     }
 

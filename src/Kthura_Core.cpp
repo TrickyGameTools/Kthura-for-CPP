@@ -544,7 +544,13 @@ namespace NSKthura {
                     TX = floor((double)(X / GW));
                     TY = floor((double)((Y - 1) / GH));
                     //BlockMap[TX, TY] = true;
-                    _BlockMap[AX + (AY * (BoundX + 1))] = true;
+                    if (AX >= BoundX || AY >= BoundY || AX < 0 || AY < 0) {
+#ifdef BLOCKMAP_YELL
+                        cout << "\7\x1b[31mBLOCKMAP ERROR!\x1b[0m Out of bounds (" << AX << "," << AY << ")  " << BoundX << "x" << BoundY << endl;
+#endif
+                    } else {
+                        _BlockMap[AX + (AY * (BoundX + 1))] = true;
+                    }
                     if (KthuraDraw::DrawDriver == NULL) Kthura::Throw("Draw Driver is null!");
                     if (KthuraDraw::DrawDriver->HasTexture(&O))
                         iw = KthuraDraw::DrawDriver->ObjectWidth(&O);
@@ -1185,8 +1191,8 @@ namespace NSKthura {
     }
 
     void KthuraActor::WalkTo(int to_x, int to_y, bool real) {
-        cout << "KthuraActor." << GetParent()->GetCreationName() <<"::WalkTo(" << to_x << "," << to_y << "," << real << ")!\n";
-        cout << "Start point: (" << O.X() << "," << O.Y() << ")\n";
+        //cout << "KthuraActor." << GetParent()->GetCreationName() <<"::WalkTo(" << to_x << "," << to_y << "," << real << ")!\n";
+        //cout << "Start point: (" << O.X() << "," << O.Y() << ")\n";
         auto gridx = GetParent()->GridX;
         auto gridy = GetParent()->GridY;
         int tox = to_x, toy = to_y;
@@ -1197,7 +1203,7 @@ namespace NSKthura {
             fromx = O.X() / gridx;
             fromy = O.Y() / gridy;
         }
-        cout << "Calc (if applicable): >> (" << fromx << "," << fromy << ") -> (" << tox << "," << toy << ")    grid: " << gridx << "x" << gridy << "\n";
+        //cout << "Calc (if applicable): >> (" << fromx << "," << fromy << ") -> (" << tox << "," << toy << ")    grid: " << gridx << "x" << gridy << "\n";
         // Old C# code but not usable in this C++ version: FoundPath = Dijkstra.QuickPath(Parent.PureBlockRev, Parent.BlockMapWidth, Parent.BlockMapHeight, fromx, fromy, tox, toy);
         //FoundPath = Kthura::PathFinder->FindPath(parentobj, tox, toy);
         FoundPath = Kthura::PathFinder->FindPath(fromx, fromy, GetParent(), tox, toy);
