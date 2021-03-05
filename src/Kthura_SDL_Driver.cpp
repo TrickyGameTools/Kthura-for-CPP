@@ -18,6 +18,11 @@
 // 3. This notice may not be removed or altered from any source distribution.
 // EndLic
 
+#undef KTHURA_TQSG_PreRenderTiled
+#define KTHURA_TQSG_TileDebug
+
+
+
 // C++
 #include <iostream>
 
@@ -41,7 +46,7 @@ namespace NSKthura{
     using namespace TrickyUnits;
     using namespace std;
 
-    static TQSG_Image* GetTex(KthuraObject* obj);
+    static TQSG_Image* GetTex(KthuraObject* obj, int w = 0, int h = 0, int ix = 0, int iy = 0);
 
     static void SDL_AnimReset(KthuraObject * O){
         auto Tex = GetTex(O);
@@ -49,7 +54,8 @@ namespace NSKthura{
     }
 
     typedef struct TKSDT {
-        TQSG_Image Img;
+        //TQSG_Image Img;
+        TQSG_AutoImage Img = nullptr;
         int LastCall = 0;
         int LastMapID = 0;
     } TKSDT;
@@ -74,10 +80,11 @@ namespace NSKthura{
         auto Now = floor(SDL_GetTicks() / 1000);
         KSDT[tag].LastCall = Now;
         KSDT[tag].LastMapID = Map->ID();
-        KSDT[tag].Img.Create(*(Map->TexDir), tex);
-        if (prefixed(tag, "Obstacle::")||prefixed(tag,"Actor::")) KSDT[tag].Img.HotBottomCenter();
+        //KSDT[tag].Img.Create(*(Map->TexDir), tex);
+        KSDT[tag].Img = TQSG_LoadAutoImage(*(Map->TexDir), tex);
+        if (prefixed(tag, "Obstacle::")||prefixed(tag,"Actor::")) KSDT[tag].Img->HotBottomCenter();
         // remove texture which were not used in a too long time.
-        actions = (actions + 1) % 250;
+        actions = (actions + 1) % 250;        
         if (!actions) {
             vector<string>KILL;
             for (auto& T : KSDT) {
@@ -90,9 +97,24 @@ namespace NSKthura{
 
     }
 
-    TQSG_Image* GetTex(KthuraObject*obj) {
+    static TQSG_Image* GetTex(KthuraObject*obj,int w,int h,int ix,int iy) {
         TQSG_Image* ret = NULL;
         string Tag = obj->Kind() + "::" + obj->Texture();
+        if (w || h) {
+            string ATag = "::ALTEREDTILE::" + to_string(w) + "::" + to_string(h) + "::" + to_string(ix) + "::" + to_string(iy)+"::"+obj->Texture();
+            if (!KSDT.count(ATag)) {
+                auto v = GetTex(obj);
+                auto RawTex = KSDT[Tag];
+                auto Tiled = RawTex.Img->CopyTiled(w, h, ix, iy);
+                auto Now = (int)floor(SDL_GetTicks() / 1000);
+                KSDT[ATag] = TKSDT{ Tiled,Now,obj->GetParent()->GetParent()->ID() };
+#ifdef KTHURA_TQSG_TileDebug
+                cout << "Creating tiled image '" << ATag << "' over " << Tag << " and we gotta see what happens next!\n";
+                cout << "= Tiled area: " << Tiled->W() << "x" << Tiled->H() << endl;
+#endif
+            }
+            Tag = ATag;
+        }
         auto lay = obj->GetParent();
         auto map = lay->GetParent();
         // cout << "Addr.Lay = " << lay << "; Addr.Map = " << map << "\n";
@@ -108,7 +130,8 @@ namespace NSKthura{
         auto TEX = &KSDT[Tag];
         TEX->LastCall = floor(SDL_GetTicks() / 1000);
         TEX->LastMapID = map->ID();
-        return &(TEX->Img);        
+        //return &(TEX->Img);    
+        return TEX->Img->Img();
     }
 
     
@@ -125,8 +148,14 @@ namespace NSKthura{
 #else
         TQSG_SetBlend(TQSG_Blend::ALPHA);
         TQSG_SetAlpha(obj->Alpha255());
+#ifdef KTHURA_TQSG_PreRenderTiled
+        auto TT = GetTex(obj, obj->W(), obj->H(), obj->insertx(), obj->inserty());
+        TQSG_Color(obj->R(), obj->G(), obj->B());
+        TT->XDraw(obj->X(), obj->Y());
+#else
         TQSG_Color(obj->R(), obj->G(), obj->B());
         GetTex(obj)->Tile(obj->X() + ix - scrollx, obj->Y() + iy - scrolly, obj->W(), obj->H(),obj->AnimFrame(),-obj->insertx(),-obj->inserty());        
+#endif
 #endif
     }
 

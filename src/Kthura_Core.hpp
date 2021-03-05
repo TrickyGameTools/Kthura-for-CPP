@@ -42,6 +42,16 @@ namespace NSKthura{
 	class KthuraObject;
 	class KthuraActor;
 	class KthuraPathFinder;
+
+	typedef struct KthuraAutoVisibleRect {
+		int
+			bx,
+			by,
+			ex,
+			ey;
+		bool
+			active;
+	}KthuraAutoVisibleRect;
 	
 	typedef void (*KthuraAnimReset)(KthuraObject* O);
 
@@ -411,6 +421,10 @@ namespace NSKthura{
 		/// </summary>
 		static bool StrictLoad;
 		static bool AutoAttachJCRForTex;
+		/// <summary>
+		/// When activated, the boolean function 'Visible()' in objects will always return 'false' regardless of the visibility setting if an object is outside of the boundaries. One note, scalable objects may not always respond properly to this, so use with care.
+		/// </summary>
+		static KthuraAutoVisibleRect AutoVisible;
 		int ID();
 		Kthura();
 		~Kthura();

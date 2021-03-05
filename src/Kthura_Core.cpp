@@ -450,7 +450,7 @@ namespace NSKthura {
             auto Obj = ObjFIdx(i);
             if (Obj->Tag() != "") {
                 if (_TagMap.count(Obj->Tag()))
-                    Kthura::Throw("Duplicate tag \"" + Obj->Tag() + "\"");
+                    Kthura::Throw("Duplicate tag \"" + Obj->Tag() + "\" (Layer:" + Obj->GetParent()->GetCreationName() + ". Kind: "+Obj->Kind()+")");
                 else
                     _TagMap[Obj->Tag()] = Obj;
             }
@@ -1403,7 +1403,33 @@ namespace NSKthura {
     }
 
     std::string KthuraObject::Texture() { kthobjret(Texture); }
-    bool KthuraObject::Visible() { kthobjret(Visible); }
+    bool KthuraObject::Visible() { 
+        if (Kthura::AutoVisible.active) {
+            switch (EKind()) {
+            case KthuraKind::TiledArea:
+            case KthuraKind::StretchedArea:
+            case KthuraKind::Zone:
+                if (
+                    X() + W() < Kthura::AutoVisible.bx ||
+                    X() > Kthura::AutoVisible.ex ||
+                    Y() + H() < Kthura::AutoVisible.by ||
+                    Y() > Kthura::AutoVisible.ey)
+                    return false;
+                break;
+            case KthuraKind::Actor:
+            case KthuraKind::Obstacle:
+                if (
+                    // No division on W(). This is a safety precaution to have a bit of a margin when it comes to scaling
+                    X() + W() < Kthura::AutoVisible.bx ||
+                    X() - W() > Kthura::AutoVisible.ex ||
+                    Y() < Kthura::AutoVisible.by ||
+                    Y() - H() > Kthura::AutoVisible.ey)
+                    return false;
+                break;
+            }
+        }
+        kthobjret(Visible); 
+    }
     int KthuraObject::W() { kthobjret(w); }
     int KthuraObject::H() { kthobjret(h); }
     int KthuraObject::insertx() { kthobjret(insertx); }
@@ -1430,7 +1456,7 @@ namespace NSKthura {
     bool KthuraObject::Impassible() { kthobjretf(Impassible); }
     int KthuraObject::RotationDegrees() { kthobjretf(RotationDegrees); }
     double KthuraObject::RotationRadians() { kthobjretf(RotationRadians); }
-    void KthuraObject::Texture(std::string value) { kthobjdef(Texture); }
+    void KthuraObject::Texture(std::string value) {         kthobjdef(Texture);     }
     void KthuraObject::Visible(bool value) { kthobjdef(Visible); }
     void KthuraObject::W(int value) { kthobjdef(w); }
     void KthuraObject::H(int value) { kthobjdef(h); }
@@ -1454,6 +1480,7 @@ namespace NSKthura {
     void KthuraObject::G(int value) { kthobjdef(G); }
     void KthuraObject::B(int value) { kthobjdef(B); }
     void KthuraObject::RotationDegrees(int value) { kthobjset(RotationDegrees); }
-
+    
+    KthuraAutoVisibleRect Kthura::AutoVisible{ 0, 0, 0, 0, false };
 
 }
