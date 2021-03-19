@@ -1,8 +1,8 @@
 // Lic:
 // src/Kthura_Core.cpp
 // Kthura - Core
-// version: 20.09.24
-// Copyright (C) 2020 Jeroen P. Broks
+// version: 21.03.18
+// Copyright (C) 2020, 2021 Jeroen P. Broks
 // This software is provided 'as-is', without any express or implied
 // warranty.  In no event will the authors be held liable for any damages
 // arising from the use of this software.
@@ -1404,31 +1404,34 @@ namespace NSKthura {
 
     std::string KthuraObject::Texture() { kthobjret(Texture); }
     bool KthuraObject::Visible() { 
+        kthobjret(Visible); 
+    }
+    bool KthuraObject::XVisible(int cx, int cy) {
         if (Kthura::AutoVisible.active) {
             switch (EKind()) {
             case KthuraKind::TiledArea:
             case KthuraKind::StretchedArea:
             case KthuraKind::Zone:
                 if (
-                    X() + W() < Kthura::AutoVisible.bx ||
-                    X() > Kthura::AutoVisible.ex ||
-                    Y() + H() < Kthura::AutoVisible.by ||
-                    Y() > Kthura::AutoVisible.ey)
+                    -cx + X() + W() < Kthura::AutoVisible.bx ||
+                    -cx + X() > Kthura::AutoVisible.ex ||
+                    -cy + Y() + H() < Kthura::AutoVisible.by ||
+                    -cy + Y() > Kthura::AutoVisible.ey)
                     return false;
                 break;
             case KthuraKind::Actor:
             case KthuraKind::Obstacle:
                 if (
                     // No division on W(). This is a safety precaution to have a bit of a margin when it comes to scaling
-                    X() + W() < Kthura::AutoVisible.bx ||
-                    X() - W() > Kthura::AutoVisible.ex ||
-                    Y() < Kthura::AutoVisible.by ||
-                    Y() - H() > Kthura::AutoVisible.ey)
+                    -cx + X() + W() < Kthura::AutoVisible.bx ||
+                    -cx + X() - W() > Kthura::AutoVisible.ex ||
+                    -cy + Y() < Kthura::AutoVisible.by ||
+                    -cy + Y() - H() > Kthura::AutoVisible.ey)
                     return false;
                 break;
             }
         }
-        kthobjret(Visible); 
+        return Visible();
     }
     int KthuraObject::W() { kthobjret(w); }
     int KthuraObject::H() { kthobjret(h); }

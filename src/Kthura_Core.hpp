@@ -1,8 +1,8 @@
 // Lic:
 // src/Kthura_Core.hpp
 // Kthura - Core (header)
-// version: 20.09.24
-// Copyright (C) 2020 Jeroen P. Broks
+// version: 21.03.18
+// Copyright (C) 2020, 2021 Jeroen P. Broks
 // This software is provided 'as-is', without any express or implied
 // warranty.  In no event will the authors be held liable for any damages
 // arising from the use of this software.
@@ -238,6 +238,7 @@ namespace NSKthura{
 		std::vector<std::string>MetaDataFields();
 		std::string Texture();
 		bool Visible();
+		bool XVisible(int cx = 0, int cy = 0);
 		int W();
 		int H();
 		int insertx();

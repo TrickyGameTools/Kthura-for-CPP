@@ -1,8 +1,8 @@
 // Lic:
 // src/Kthura_SDL_Driver.cpp
 // Kthura - Driver to make Kthura use SDL
-// version: 20.09.24
-// Copyright (C) 2020 Jeroen P. Broks
+// version: 21.03.18
+// Copyright (C) 2020, 2021 Jeroen P. Broks
 // This software is provided 'as-is', without any express or implied
 // warranty.  In no event will the authors be held liable for any damages
 // arising from the use of this software.
@@ -168,7 +168,9 @@ namespace NSKthura{
         TQSG_Color(obj->R(), obj->G(), obj->B());
         auto oldr = TQSG_Rotate();
         TQSG_Rotate(obj->RotationDegrees());
+        SetScale((double)obj->ScaleX()/1000, (double)obj->ScaleY()/1000);
         GetTex(obj)->XDraw(obj->X()+ix-scrollx, obj->Y()+iy-scrolly,obj->AnimFrame());
+        SetScale(1, 1);
         TQSG_Rotate(oldr);
 #endif
     }

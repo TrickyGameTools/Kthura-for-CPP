@@ -1,8 +1,8 @@
 // Lic:
 // src/Kthura_Draw.cpp
 // Kthura - Drawing engine
-// version: 20.09.22
-// Copyright (C) 2020 Jeroen P. Broks
+// version: 21.03.18
+// Copyright (C) 2020, 2021 Jeroen P. Broks
 // This software is provided 'as-is', without any express or implied
 // warranty.  In no event will the authors be held liable for any damages
 // arising from the use of this software.
@@ -39,7 +39,7 @@ namespace NSKthura {
         //foreach(KthuraObject obj in layer.ObjectDrawOrder) {
         for(auto&objid:layer._DomMap){
             auto obj=objid.second;
-            if (obj->Visible() || IgnoreVisibility) {
+            if (obj->XVisible(scrollx,scrolly) || IgnoreVisibility) {
                 // std::cout << obj->Kind() << " << Draw\n";
                 if (true) { // This looks useless now, but this routine will be used later in optimalisation to see if an object is actually on screen, and if not, ignore it.
                     if (!DrawDriver) { Kthura::Throw("I cannot draw without a DrawDriver!"); return; }
