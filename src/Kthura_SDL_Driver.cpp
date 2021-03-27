@@ -1,7 +1,7 @@
 // Lic:
 // src/Kthura_SDL_Driver.cpp
 // Kthura - Driver to make Kthura use SDL
-// version: 21.03.18
+// version: 21.03.27
 // Copyright (C) 2020, 2021 Jeroen P. Broks
 // This software is provided 'as-is', without any express or implied
 // warranty.  In no event will the authors be held liable for any damages
@@ -19,7 +19,8 @@
 // EndLic
 
 #undef KTHURA_TQSG_PreRenderTiled
-#define KTHURA_TQSG_TileDebug
+#undef KTHURA_TQSG_TileDebug
+#define KTHURA_TQSG_TileVP
 
 
 
@@ -47,6 +48,7 @@ namespace NSKthura{
     using namespace std;
 
     static TQSG_Image* GetTex(KthuraObject* obj, int w = 0, int h = 0, int ix = 0, int iy = 0);
+    static TQSG_AutoImage GetTexAuto(KthuraObject* obj, int w = 0, int h = 0, int ix = 0, int iy = 0);
 
     static void SDL_AnimReset(KthuraObject * O){
         auto Tex = GetTex(O);
@@ -97,7 +99,7 @@ namespace NSKthura{
 
     }
 
-    static TQSG_Image* GetTex(KthuraObject*obj,int w,int h,int ix,int iy) {
+    static TQSG_AutoImage GetTexAuto(KthuraObject*obj,int w,int h,int ix,int iy) {
         TQSG_Image* ret = NULL;
         string Tag = obj->Kind() + "::" + obj->Texture();
         if (w || h) {
@@ -131,7 +133,11 @@ namespace NSKthura{
         TEX->LastCall = floor(SDL_GetTicks() / 1000);
         TEX->LastMapID = map->ID();
         //return &(TEX->Img);    
-        return TEX->Img->Img();
+        return TEX->Img; // ->Img();
+    }
+
+    static TQSG_Image* GetTex(KthuraObject* obj, int w, int h, int ix, int iy) {
+        return GetTexAuto(obj, w, h, ix, iy)->Img();
     }
 
     
@@ -152,6 +158,9 @@ namespace NSKthura{
         auto TT = GetTex(obj, obj->W(), obj->H(), obj->insertx(), obj->inserty());
         TQSG_Color(obj->R(), obj->G(), obj->B());
         TT->XDraw(obj->X(), obj->Y());
+#elif defined(KTHURA_TQSG_TileVP)
+        TQSG_Color(obj->R(), obj->G(), obj->B());
+        GetTexAuto(obj)->TileVP(obj->X() + ix - scrollx, obj->Y() + iy - scrolly, obj->W(), obj->H(), obj->AnimFrame(), -obj->insertx(), -obj->inserty());
 #else
         TQSG_Color(obj->R(), obj->G(), obj->B());
         GetTex(obj)->Tile(obj->X() + ix - scrollx, obj->Y() + iy - scrolly, obj->W(), obj->H(),obj->AnimFrame(),-obj->insertx(),-obj->inserty());        
