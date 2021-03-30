@@ -167,6 +167,12 @@ namespace NSKthura{
 #endif
 #endif
     }
+    void Kthura_Draw_SDL_Driver::DrawRect(KthuraObject* obj, int ix, int iy, int scrollx, int scrolly) {
+        TQSG_SetBlend(TQSG_Blend::ALPHA);
+        TQSG_SetAlpha(obj->Alpha255());
+        TQSG_Color(obj->R(), obj->G(), obj->B());
+        TQSG_Rect(obj->X() - scrollx, obj->Y() - scrolly, obj->W(), obj->H());
+    }
 
     void Kthura_Draw_SDL_Driver::DrawObstacle(KthuraObject* obj, int ix, int iy, int scrollx, int scrolly) {
         //cout << "Obstacle\n";
@@ -174,6 +180,8 @@ namespace NSKthura{
         TQSG_Color(255, 180, 0);
         for (int i = 0; i < 50; i++) TQSG_Circle(obj->X() + ix - scrollx, obj->Y() + iy - scrolly, i);
 #else
+        TQSG_SetBlend(TQSG_Blend::ALPHA);
+        TQSG_SetAlpha(obj->Alpha255());
         TQSG_Color(obj->R(), obj->G(), obj->B());
         auto oldr = TQSG_Rotate();
         TQSG_Rotate(obj->RotationDegrees());

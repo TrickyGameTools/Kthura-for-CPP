@@ -65,6 +65,7 @@ namespace NSKthura {
         ret["Pivot"] = KthuraKind::Pivot;
         ret["Exit"] = KthuraKind::Exit;
         ret["Actor"] = KthuraKind::Actor;
+        ret["Rect"] = KthuraKind::Rect;
         return ret;
     }
     static std::map<std::string, KthuraKind> MapKind = InitMapKind();
@@ -208,7 +209,7 @@ namespace NSKthura {
         if (!parent->HasTag(ztag)) return false;
         auto zone = parent->TagMap(ztag);
         if (Kind() != "Obstacle" && Kind() != "Actor") Kthura::Throw("KthuraMap.Object.IsInzone(\"" + ztag + "\"): Main Object must be either Object or Actor (it is a " + Kind() + ")");
-        if (zone->Kind() != "TiledArea" && zone->Kind() != "Zone") Kthura::Throw("KthuraMap.Object.IsInzone\"" + ztag + "\"): Zone Object must be either Zone or TiledArea");
+        if (zone->Kind() != "TiledArea" && zone->Kind() != "Zone" && zone->Kind()!="StretchedArea" && zone->Kind() != "Rect") Kthura::Throw("KthuraMap.Object.IsInzone\"" + ztag + "\"): Zone Object must be either Zone or TiledArea");
         return X() >= zone->X() && Y() >= zone->Y() && X() <= zone->X() + zone->W() && Y() <= zone->Y() + zone->H();
     }
     bool KthuraObject::CheckParent(KthuraLayer* p) { kthobjret(CheckParent(p)); }
@@ -218,6 +219,7 @@ namespace NSKthura {
         case KthuraKind::Zone:
         case KthuraKind::TiledArea:
         case KthuraKind::StretchedArea:
+        case KthuraKind::Rect:
             return (x >= X() && x <= X() + W() && y >= Y() && y <= Y() + H());
         case KthuraKind::Actor:
         case KthuraKind::Obstacle:
@@ -243,6 +245,7 @@ namespace NSKthura {
         case KthuraKind::Zone:
         case KthuraKind::TiledArea:
         case KthuraKind::StretchedArea:
+        case KthuraKind::Rect:
             return "A:("+to_string(X())+","+to_string(Y())+") - (" + to_string(X()+W()) + "," + to_string(Y()+H()) + ")";
         case KthuraKind::Actor:
         case KthuraKind::Obstacle:
@@ -301,7 +304,7 @@ namespace NSKthura {
         if (!parent->HasTag(ztag)) return false;
         auto zone = parent->TagMap(ztag);
         if (Kind() != "Obstacle" && Kind() != "Actor") Kthura::Throw("KthuraMap.Object.IsInzone(\"" + ztag + "\"): Main Object must be either Object or Actor (it is a " + Kind() + ")");
-        if (zone->Kind() != "TiledArea" && zone->Kind() != "Zone") Kthura::Throw("KthuraMap.Object.IsInzone\"" + ztag + "\"): Zone Object must be either Zone or TiledArea");
+        if (zone->Kind() != "TiledArea" && zone->Kind() != "Zone" && zone->Kind() != "Rect" && zone->Kind() != "Rect") Kthura::Throw("KthuraMap.Object.IsInzone\"" + ztag + "\"): Zone Object must be either Zone or TiledArea");
         return X() >= zone->X() && Y() >= zone->Y() && X() <= zone->X() + zone->W() && Y() <= zone->Y() + zone->H();
     }
 

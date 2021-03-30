@@ -50,6 +50,9 @@ namespace NSKthura {
                         obj->Animate(DrawDriver->AnimReset);
                         DrawDriver->DrawTiledArea(obj, x, y, scrollx, scrolly);
                         break;
+                    case KthuraKind::Rect:                        
+                        DrawDriver->DrawRect(obj, x, y, scrollx, scrolly);
+                        break;
                     case KthuraKind::StretchedArea:
                         obj->Animate(DrawDriver->AnimReset);
                         DrawDriver->DrawStretchedArea(obj, x, y, scrollx, scrolly);

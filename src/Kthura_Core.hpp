@@ -34,7 +34,7 @@
 
 namespace NSKthura{
 	
-	enum class KthuraKind { Unknown, Zone, TiledArea, StretchedArea, Obstacle, Pic, Actor, CustomItem, Pivot, Exit };
+	enum class KthuraKind { Unknown, Zone, TiledArea, StretchedArea, Obstacle, Pic, Actor, CustomItem, Pivot, Exit, Rect };
 
 	class Kthura;
 	class KthuraLayer;

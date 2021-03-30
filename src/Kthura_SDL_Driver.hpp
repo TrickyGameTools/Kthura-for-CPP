@@ -35,6 +35,7 @@ namespace NSKthura{
 		static void Init();
 
 		void DrawTiledArea(KthuraObject* obj, int ix = 0, int iy = 0, int scrollx = 0, int scrolly = 0);
+		void DrawRect(KthuraObject* obj, int ix = 0, int iy = 0, int scrollx = 0, int scrolly = 0);
 		void DrawObstacle(KthuraObject* obj, int ix = 0, int iy = 0, int scrollx = 0, int scrolly = 0);
 		//void DrawActor(KthuraActor* obj, int ix = 0, int iy = 0, int scrollx = 0, int scrolly = 0);
 		void DrawActor(KthuraObject* obj, int ix = 0, int iy = 0, int scrollx = 0, int scrolly = 0);

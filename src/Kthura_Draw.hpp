@@ -39,6 +39,7 @@ namespace NSKthura {
         virtual void DrawActor(KthuraObject* obj, int ix = 0, int iy = 0, int scrollx = 0, int scrolly = 0) = 0;
         virtual void DrawPic(KthuraObject* obj, int ix = 0, int iy = 0, int scrollx = 0, int scrolly = 0) = 0;
         virtual void DrawStretchedArea(KthuraObject* obj, int ix = 0, int iy = 0, int scrollx = 0, int scrolly = 0) = 0;
+        virtual void DrawRect(KthuraObject* obj, int ix = 0, int iy = 0, int scrollx = 0, int scrolly = 0) = 0;
         KthuraAnimReset AnimReset = NULL;
         virtual int ObjectWidth(KthuraObject* obj) = 0;
         virtual int ObjectHeight(KthuraObject* obj) = 0;
