@@ -171,7 +171,7 @@ namespace NSKthura{
         TQSG_SetBlend(TQSG_Blend::ALPHA);
         TQSG_SetAlpha(obj->Alpha255());
         TQSG_Color(obj->R(), obj->G(), obj->B());
-        TQSG_Rect(obj->X() - scrollx, obj->Y() - scrolly, obj->W(), obj->H());
+        TQSG_Rect(ix+obj->X() - scrollx, iy+obj->Y() - scrolly, obj->W(), obj->H());
     }
 
     void Kthura_Draw_SDL_Driver::DrawObstacle(KthuraObject* obj, int ix, int iy, int scrollx, int scrolly) {
