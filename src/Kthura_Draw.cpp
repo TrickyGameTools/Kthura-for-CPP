@@ -30,14 +30,14 @@ namespace NSKthura {
 	DelDrawPoint KthuraDraw::DrawCSpot = NULL;
 	bool KthuraDraw::IgnoreVisibility = false;
 
-	void KthuraDraw::DrawMap(KthuraLayer &layer, int scrollx, int scrolly, int x, int y) {
+	void KthuraDraw::DrawMap(KthuraLayer *layer, int scrollx, int scrolly, int x, int y) {
         bool AutoRemapOnHold = Kthura::AutoMap;
         bool actorsmoved = false;
         Kthura::AutoMap = false;
         //if (layer.ObjectDrawOrder == null) layer.RemapDominance(); // No longer needed! The C++ class now handles this automatically.
         
         //foreach(KthuraObject obj in layer.ObjectDrawOrder) {
-        for(auto&objid:layer._DomMap){
+        for(auto&objid:layer->_DomMap){
             auto obj=objid.second;
             if (obj->XVisible(scrollx,scrolly) || IgnoreVisibility) {
                 // std::cout << obj->Kind() << " << Draw\n";
@@ -91,9 +91,9 @@ namespace NSKthura {
         }
         // Restore Automap
         Kthura::AutoMap = AutoRemapOnHold;
-        if (Kthura::AutoMap && actorsmoved) layer.TotalRemap(); // If actors have moved, make sure remapping is done
+        if (Kthura::AutoMap && actorsmoved) layer->TotalRemap(); // If actors have moved, make sure remapping is done
     }
 
-	void KthuraDraw::DrawMap(Kthura& map, std::string layer, int scrollx, int scrolly, int x, int y) { DrawMap(map.Layers[layer], scrollx, scrolly, x, y); }
+	void KthuraDraw::DrawMap(Kthura& map, std::string layer, int scrollx, int scrolly, int x, int y) { DrawMap(map.Layer(layer), scrollx, scrolly, x, y); }
 
 }

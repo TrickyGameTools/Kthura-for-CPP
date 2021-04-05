@@ -217,7 +217,15 @@ namespace NSKthura{
     }
 
     void Kthura_Draw_SDL_Driver::DrawPic(KthuraObject* obj, int ix, int iy, int scrollx, int scrolly) {
-        Kthura::Throw("No Kthura-PIC support (yet)");
+        // Kthura::Throw("No Kthura-PIC support (yet)");
+        auto tx = GetTexAuto(obj);
+        SetScale(obj->ScaleX() / 1000, obj->ScaleY() / 1000);
+        //if (obj->AnimFrame() >= tx->Frames()) obj->AnimFrame(0);
+        TQSG_Color((byte)obj->R(), (byte)obj->G(), (byte)obj->B());
+        //TQMG.SetAlphaFloat((float)obj.Alpha1000 / 1000);
+        TQSG_SetAlpha((byte)obj->Alpha255());
+        tx->Draw(obj->X() + ix - scrollx, obj->Y() + iy - scrolly, obj->AnimFrame());
+
         // This is an unofficial object kind only put in in order to convert Teddybear levels
     }
 

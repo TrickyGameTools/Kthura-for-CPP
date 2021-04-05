@@ -27,6 +27,7 @@
 
 // Requires Tricky's Units!
 #include <QuickString.hpp>
+#include <GINIE.hpp>
 //#include <dim2.hpp> // Didn't work the way it should... Needs more study!
 
 // JCR6 is needed for loading. Kthura files are just JCR6 files after all
@@ -396,12 +397,16 @@ namespace NSKthura{
 		static int countup;
 		int _id;
 	public:
+		bool _ignorecase_tags{ true }; // NEVER access directly! 
+		bool _ignorecase_labels{ true };// NEVER access directly!
 		///<summary>NEVER, and I repeat NEVER address the Layers map directly unless you know what you are doing!</summary>
-		std::map<std::string, KthuraLayer> Layers;
+		std::map<std::string,std::shared_ptr< KthuraLayer>> Layers;
 		std::map<std::string, std::string> MetaData;
 		jcr6::JT_Dir* TexDir=NULL;
 		KthuraLayer* Layer(std::string lay);
+		TrickyUnits::GINIE Options;
 		void NewLayer(std::string lay, bool force = false);
+		void RenameLayer(std::string vieux, std::string nouveau);
 		void KillLayer(std::string lay);
 		void KillAllLayers();
 		void KillMap();

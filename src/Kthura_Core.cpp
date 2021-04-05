@@ -17,11 +17,19 @@
 // misrepresented as being the original software.
 // 3. This notice may not be removed or altered from any source distribution.
 // EndLic
+
+// This is for loading older maps without an "Options" entry, to prevent conflicts.
+// Please note that this is a deprecated feature, in order to prevent trouble on older
+// Maps written with the BlitzMax and C# versions of the Kthura editor.
+#define DEFAULT_CASESENSENSITIVE_LOAD
+    
+
 // C++
 #include <iostream>
 
 // Tricky's Units
 #include <QuickString.hpp>
+
 
 // Kthura
 #include "Kthura_Core.hpp"
@@ -385,6 +393,7 @@ namespace NSKthura {
         return ID_Map;
     }
     KthuraObject* KthuraLayer::TagMap(std::string Tag) {
+        if (parent->_ignorecase_tags) Tag = Upper(Tag);
         if (_TagMap.count(Tag)) return _TagMap[Tag];
         //for (auto lck : parent->Layers) std::cout << "Layer: " << lck.first << "; check: " << (&lck.second == this) << "!";
         std::cout << "Error in layer: '" << GetCreationName() << "'\n";
@@ -403,6 +412,7 @@ namespace NSKthura {
     }
 
     std::vector<KthuraObject*>* KthuraLayer::LabelMap(std::string label) {
+        if (parent->_ignorecase_labels) label = Upper(label);
         if (_LabelMap.count(label)) return &_LabelMap[label];
         return &std::vector<KthuraObject*>();
     }
@@ -451,11 +461,13 @@ namespace NSKthura {
         //        for (auto& Obj : Objects) {
         for (int i = 0; i < CountObjects(); i++) {
             auto Obj = ObjFIdx(i);
-            if (Obj->Tag() != "") {
-                if (_TagMap.count(Obj->Tag()))
-                    Kthura::Throw("Duplicate tag \"" + Obj->Tag() + "\" (Layer:" + Obj->GetParent()->GetCreationName() + ". Kind: "+Obj->Kind()+")");
+            auto ObjTag = Obj->Tag();
+            if (parent->_ignorecase_tags) ObjTag = Upper(ObjTag);
+            if (ObjTag != "") {
+                if (_TagMap.count(ObjTag))
+                    Kthura::Throw("Duplicate tag \"" + ObjTag + "\" (Layer:" + Obj->GetParent()->GetCreationName() + ". Kind: "+Obj->Kind()+")");
                 else
-                    _TagMap[Obj->Tag()] = Obj;
+                    _TagMap[ObjTag] = Obj;
             }
         }
     }
@@ -466,7 +478,12 @@ namespace NSKthura {
         for (int i = 0; i < CountObjects(); i++) {
             auto Obj = ObjFIdx(i);
             auto labels = TrickyUnits::Split(Obj->Labels(), ',');
-            for (auto label : labels) _LabelMap[label].push_back(Obj);
+            for (auto label : labels) {
+                if (parent->_ignorecase_labels)
+                    _LabelMap[Upper(label)].push_back(Obj);
+                else
+                    _LabelMap[label].push_back(Obj);
+            }
         }
     }
 
@@ -822,7 +839,7 @@ namespace NSKthura {
     KthuraLayer* Kthura::Layer(std::string lay) {
         lay = Upper(lay);
         if (!Layers.count(lay)) { Throw("No layer called \"" + lay + "\" found!"); return NULL; }
-        return &Layers[lay];
+        return Layers[lay].get();
     }
     void Kthura::NewLayer(std::string lay, bool force) {
         lay = Upper(lay);        
@@ -834,18 +851,31 @@ namespace NSKthura {
                 return;
             }
         }
-        Layers[lay].SetParent(this,lay);
-        Layers[lay].TotalRemap();
+        Layers[lay] = std::make_shared<KthuraLayer>();
+        Layers[lay]->SetParent(this,lay);
+        Layers[lay]->TotalRemap();
+    }
+
+    void Kthura::RenameLayer(std::string vieux, std::string nouveau) {
+        vieux = Upper(vieux);
+        nouveau = Upper(nouveau);
+        if (vieux == nouveau) return;
+        if (Layers.count(nouveau)) {
+            Throw("New layer '" + nouveau + "' already exists");
+            return;
+        }
+        Layers[nouveau] = Layers[vieux];
+        Layers.erase(vieux);
     }
     void Kthura::KillLayer(std::string lay) {
         if (!Layers.count(TrickyUnits::Upper(lay))) return;
-        Layers[TrickyUnits::Upper(lay)].KillAllObjects();
+        Layers[TrickyUnits::Upper(lay)]->KillAllObjects();
         Layers.erase(TrickyUnits::Upper(lay));
     }
 
     void Kthura::KillAllLayers() {
         for (auto& l : Layers) {
-            l.second.KillAllObjects();
+            l.second->KillAllObjects();
         }
         Layers.clear();
     }
@@ -858,9 +888,17 @@ namespace NSKthura {
     bool Kthura::AutoAttachJCRForTex{ false };
     bool Kthura::StrictLoad = true;
     void Kthura::Load(jcr6::JT_Dir& sourcedir, std::string Prefix) {        
+#ifdef DEFAULT_CASESENSENSITIVE_LOAD
+        Options.Value("IgnoreCase", "Tags", "NO");
+        Options.Value("IgnoreCase", "Labels", "NO");
+#endif
         if (AutoAttachJCRForTex) this->TexDir = &sourcedir;
         if (!sourcedir.EntryExists(Prefix + "Objects")) { Throw(Prefix + "Objects has not been found in JCR6 resource!"); return; }
-        if (!sourcedir.EntryExists(Prefix + "Data")) { Throw(Prefix + "Objects has not been found in JCR6 resource!"); return; }
+        if (!sourcedir.EntryExists(Prefix + "Data")) { Throw(Prefix + "Data has not been found in JCR6 resource!"); return; }
+        if (sourcedir.EntryExists(Prefix + "Options")) {
+            auto optionstr{ sourcedir.String(Prefix + "Options") };
+            Options.Parse(optionstr);
+        }
         /*Debug stuff that is not really suitable for C++ but kept for reference's sake!
         bool dochat = true;
 
@@ -910,8 +948,8 @@ namespace NSKthura {
 #endif
                 } else if (l == "NEW") {
                     //obj = new KthuraRegObject("?", ret.Layers[curlayername]);
-                    Layers[Upper(curlayername)].NewObject("??");
-                    obj = Layers[Upper(curlayername)].LastObject();
+                    Layers[Upper(curlayername)]->NewObject("??");
+                    obj = Layers[Upper(curlayername)]->LastObject();
                     //chat($"New object in {curlayername}");
                 } else {
                     auto pi = l.find_first_of('=', 0); if (pi < 0) {
@@ -931,7 +969,7 @@ namespace NSKthura {
                     if (key == "LAYER") { //kthload_case("LAYER":
                         obj = NULL;
                         curlayername = Upper(value);
-                        curlayer = &Layers[value];
+                        curlayer = Layers[value].get();
                         curlayer->SetParent(this,curlayername);
 #ifdef Kthura_LoadChat
                         cout << "LAYER is now: " << value << "\n";
@@ -1073,7 +1111,7 @@ namespace NSKthura {
         }    
         AutoMap = tempautomap;
         //foreach(KthuraLayer lay in ret.Layers.Values) lay.TotalRemap();
-        for (auto ilay : Layers) { ilay.second.TotalRemap(); }
+        for (auto ilay : Layers) { ilay.second->TotalRemap(); }
         //return ret;
     }
     
@@ -1085,13 +1123,15 @@ namespace NSKthura {
     }
 
     void Kthura::Remap() {
+        _ignorecase_labels = Upper(Options.Value("IgnoreCase", "Labels")) == "YES";
+        _ignorecase_tags = Upper(Options.Value("IgnoreCase", "Tags")) == "YES";
         for (auto ti : Layers) {
             Layer(ti.first)->TotalRemap();
         }
     }
 
     void Kthura::RemoveActors() {
-        for (auto& Layer : Layers) Layer.second.RemoveActors();
+        for (auto& Layer : Layers) Layer.second->RemoveActors();
     }
 
     void Kthura::Throw(std::string err) {
@@ -1108,6 +1148,8 @@ namespace NSKthura {
 
     Kthura::Kthura() {
         _id = countup++;
+        Options.Value("IgnoreCase", "Tags", "YES");
+        Options.Value("IgnoreCase", "Labels", "YES");
     }
 
     Kthura::~Kthura() {

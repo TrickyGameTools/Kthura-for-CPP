@@ -55,7 +55,7 @@ namespace NSKthura {
         static bool IgnoreVisibility ; // If set to true, invisible objects will still be shown.
        
         // Draw current layer
-        static void DrawMap(KthuraLayer &layer, int scrollx = 0, int scrolly = 0, int x = 0, int y = 0);
+        static void DrawMap(KthuraLayer *layer, int scrollx = 0, int scrolly = 0, int x = 0, int y = 0);
 
         // Draw the current map
         static void DrawMap(Kthura &map, std::string layer, int scrollx = 0, int scrolly = 0, int x = 0, int y = 0); 
