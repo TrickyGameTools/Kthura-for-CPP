@@ -333,21 +333,23 @@ namespace NSKthura {
         return _alpha1000;
     }
 
-    KthuraObject KthuraObject::Create(std::string Kind, KthuraLayer* p) {
-        KthuraObject ret(Kind, p);
+    KthuraShObject KthuraObject::Create(std::string Kind, KthuraLayer* p) {
+        //KthuraObject ret(Kind, p);
+        auto ret = make_shared<KthuraObject>(Kind, p);
         //ret._Kind = Kind;
         //ret.parent = p;
-        ret._id = p->nextID();
+        ret->_id = p->nextID();
         return ret;
     }
-    KthuraObject KthuraObject::Import(KthuraActor* Act) {
-        KthuraObject ret(Act);
-        ret._id = Act->GetParent()->nextID();
-        Act->SetObject(&ret);
-        cout << "Debug: Actor imported on layer: " << ret.A->GetParent()->GetCreationName() << endl;
-        cout << "Debug: Extra check: " << ret.GetParent()->GetCreationName() << endl;
-        if (ret.GetParent() != ret.A->GetParent()) cout << "DEBUG: \x7 WOWOWOWOW! Parent mismatch!" << endl;
-        if (&ret != Act->GetObject()) cout << "DEBUG: \x7 WOWOWOW! Object data not in order!" << endl;
+    KthuraShObject KthuraObject::Import(KthuraActor* Act) {
+        //KthuraObject ret(Act);
+        auto ret = make_shared<KthuraObject>(Act);
+        ret->_id = Act->GetParent()->nextID();
+        Act->SetObject(ret.get());
+        cout << "Debug: Actor imported on layer: " << ret->A->GetParent()->GetCreationName() << endl;
+        cout << "Debug: Extra check: " << ret->GetParent()->GetCreationName() << endl;
+        if (ret->GetParent() != ret->A->GetParent()) cout << "DEBUG: \x7 WOWOWOWOW! Parent mismatch!" << endl;
+        if (ret.get() != Act->GetObject()) cout << "DEBUG: \x7 WOWOWOW! Object data not in order!" << endl;
         return ret;
     }
     bool KthuraRegObject::CheckParent(KthuraLayer* p) {
@@ -380,7 +382,7 @@ namespace NSKthura {
         //int aindex = index - Objects.size();
         //cout << "DEBUG OBJFIDX: Object Index: " << index << "/"<<Objects.size()<<"; Actor Index: " << aindex << "/"<<Actors.size()<<".\n";
         if (index < Objects.size())
-            return &Objects[index];
+            return Objects[index].get();
         //else if (aindex < Actors.size())
         //    return &Actors[index];
         return NULL;
@@ -418,7 +420,7 @@ namespace NSKthura {
     }
 
     KthuraObject* KthuraLayer::LastObject() {
-        return &Objects[Objects.size() - 1];
+        return Objects[Objects.size() - 1].get();
     }
 
     std::string KthuraLayer::BlockMapStringDump() {
@@ -496,11 +498,11 @@ namespace NSKthura {
         int iw, tiw, ih, tih;
         // Let's first get the bounderies
         for (auto& O : Objects) {
-            X = O.X(); if (X < 0) X = 0;
-            Y = O.Y(); if (Y < 0) Y = 0;
-            W = O.W() - 1; if (W < 0) W = 0;
-            H = O.H() - 1; if (H < 0) H = 0;
-            switch (O.EKind()) {
+            X = O->X(); if (X < 0) X = 0;
+            Y = O->Y(); if (Y < 0) Y = 0;
+            W = O->W() - 1; if (W < 0) W = 0;
+            H = O->H() - 1; if (H < 0) H = 0;
+            switch (O->EKind()) {
             case KthuraKind::TiledArea:
             case KthuraKind::Zone:
             case KthuraKind::StretchedArea:
@@ -528,14 +530,14 @@ namespace NSKthura {
         //BlockMap = new bool[BoundX + 1, BoundY + 1];
         _BlockMap.clear(); for (int i = 0; i < (BoundX + 1) * (BoundY + 1); ++i) _BlockMap.push_back(false); // Primitive, but for now all I got.
         // And now for the REAL work.		
-        for (KthuraObject& O : Objects) {
-            if (O.Impassible()) {
-                //Debug.WriteLine($"Checking object {O.kind}; {O.Texture}; {O.Labels}");
-                X = O.X(); if (X < 0) X = 0;
-                Y = O.Y(); if (Y < 0) Y = 0;
-                W = O.W() - 1; if (W < 0) W = 0;
-                H = O.H() - 1; if (H < 0) H = 0;
-                switch (O.EKind()) {
+        for (auto O : Objects) {
+            if (O->Impassible()) {
+                //Debug.WriteLine($"Checking object {O->kind}; {O->Texture}; {O->Labels}");
+                X = O->X(); if (X < 0) X = 0;
+                Y = O->Y(); if (Y < 0) Y = 0;
+                W = O->W() - 1; if (W < 0) W = 0;
+                H = O->H() - 1; if (H < 0) H = 0;
+                switch (O->EKind()) {
                 case KthuraKind::TiledArea:
                 case KthuraKind::Zone:
                 case KthuraKind::StretchedArea:
@@ -572,8 +574,8 @@ namespace NSKthura {
                         _BlockMap[AX + (AY * (BoundX + 1))] = true;
                     }
                     if (KthuraDraw::DrawDriver == NULL) Kthura::Throw("Draw Driver is null!");
-                    if (KthuraDraw::DrawDriver->HasTexture(&O))
-                        iw = KthuraDraw::DrawDriver->ObjectWidth(&O);
+                    if (KthuraDraw::DrawDriver->HasTexture(O.get()))
+                        iw = KthuraDraw::DrawDriver->ObjectWidth(O.get());
                     else
                         iw = 0;
                     tiw = ceil((double)iw / GW) - 1;
@@ -587,10 +589,10 @@ namespace NSKthura {
                     TY = floor((double)Y / GH);
                     //BlockMap[TX, TY] = true;
                     _BlockMap[AX + (AY * (BoundX + 1))] = true;
-                    if (KthuraDraw::DrawDriver->HasTexture(&O)) {
-                        iw = KthuraDraw::DrawDriver->ObjectWidth(&O); //ImageWidth(o.textureimage)
+                    if (KthuraDraw::DrawDriver->HasTexture(O.get())) {
+                        iw = KthuraDraw::DrawDriver->ObjectWidth(O.get()); //ImageWidth(o.textureimage)
                         tiw = ceil((double)iw / GW);
-                        ih = KthuraDraw::DrawDriver->ObjectHeight(&O); //ImageHeight(o.textureimage)
+                        ih = KthuraDraw::DrawDriver->ObjectHeight(O.get()); //ImageHeight(o.textureimage)
                         tih = ceil((double)ih / GH);
                         for (AX = TX; AX < TX + (tiw); AX++) for (AY = TY; AY < TY + tih; AY++) {
                             if (AX >= 0 && AX <= BoundX && AY <= BoundY && AY >= 0) _BlockMap[AX + (AY * (BoundX + 1))] = true;// BlockMap[AX, AY] = true;
@@ -601,13 +603,13 @@ namespace NSKthura {
             }
         }
         // And this will force a way open if applicable	
-        for (KthuraObject& O : Objects) {
-            if (O.ForcePassible()) {
-                X = O.X(); if (X < 0) X = 0;
-                Y = O.Y(); if (Y < 0) Y = 0;
-                W = O.W() - 1; if (W < 0) W = 0;
-                H = O.H() - 1; if (H < 0) H = 0;
-                switch (O.EKind()) {
+        for (auto O : Objects) {
+            if (O->ForcePassible()) {
+                X = O->X(); if (X < 0) X = 0;
+                Y = O->Y(); if (Y < 0) Y = 0;
+                W = O->W() - 1; if (W < 0) W = 0;
+                H = O->H() - 1; if (H < 0) H = 0;
+                switch (O->EKind()) {
                 case KthuraKind::TiledArea:
                 case KthuraKind::Zone:
                 case KthuraKind::StretchedArea:
@@ -638,8 +640,8 @@ namespace NSKthura {
                     //BlockMap[TX, TY] = false;
                     _BlockMap[AX + (AY * (BoundX + 1))] = false;
                     if (KthuraDraw::DrawDriver == NULL) Kthura::Throw("Draw Driver is null!");
-                    if (KthuraDraw::DrawDriver->HasTexture(&O))
-                        iw = KthuraDraw::DrawDriver->ObjectWidth(&O);
+                    if (KthuraDraw::DrawDriver->HasTexture(O.get()))
+                        iw = KthuraDraw::DrawDriver->ObjectWidth(O.get());
                     else
                         iw = 0;
                     tiw = ceil((double)iw / GW) - 1;
@@ -653,10 +655,10 @@ namespace NSKthura {
                     TY = (int)floor((double)Y / GH);
                     //BlockMap[TX, TY] = false;
                     _BlockMap[AX + (AY * (BoundX + 1))] = false;
-                    if (KthuraDraw::DrawDriver->HasTexture(&O)) {
-                        iw = KthuraDraw::DrawDriver->ObjectWidth(&O); //ImageWidth(o.textureimage)
+                    if (KthuraDraw::DrawDriver->HasTexture(O.get())) {
+                        iw = KthuraDraw::DrawDriver->ObjectWidth(O.get()); //ImageWidth(o.textureimage)
                         tiw = ceil((double)iw / GW);
-                        ih = KthuraDraw::DrawDriver->ObjectHeight(&O); //ImageHeight(o.textureimage)
+                        ih = KthuraDraw::DrawDriver->ObjectHeight(O.get()); //ImageHeight(o.textureimage)
                         tih = ceil((double)ih / GH);
                         for (AX = TX; AX < TX + (tiw); AX++) for (AY = TY; AY < TY + tih; AY++) {
                             if (AX >= 0 && AX <= BoundX && AY <= BoundY && AY >= 0) _BlockMap[AX + (AY * (BoundX + 1))] = false;// BlockMap[AX, AY] = true;
@@ -673,7 +675,7 @@ namespace NSKthura {
     void KthuraLayer::RemapID() {
         ID_Map.clear();
         for (auto& Obj : Objects) {
-            ID_Map[Obj.ID()] = &Obj;
+            ID_Map[Obj->ID()] = Obj.get();
         }
     }
 
@@ -693,13 +695,13 @@ namespace NSKthura {
     KthuraObject* KthuraLayer::RNewObject(std::string Kind) {
         NewObject(Kind);
         TotalRemap();
-        return &Objects[Objects.size() - 1];
+        return Objects[Objects.size() - 1].get();
     }
 
     void KthuraLayer::Spawn(std::string spottag, std::string ActorTag) {
         //Actors.push_back(KthuraActor::Spawn(this, spottag));
         Objects.push_back(KthuraObject::Import(new KthuraActor(this, spottag)));
-        Objects[Objects.size() - 1].Tag(ActorTag);
+        Objects[Objects.size() - 1]->Tag(ActorTag);
         //Objects[Objects.size() - 1].autokill = true;                        
         if (Kthura::AutoMap) TotalRemap();
         RemapID();
@@ -710,7 +712,7 @@ namespace NSKthura {
         //Actors.push_back(KthuraActor::Spawn(this, spot));
         //Actors[Actors.size()-1].Tag(ActorTag);
         Objects.push_back(KthuraObject::Import(new KthuraActor(this, spot)));
-        Objects[Objects.size() - 1].Tag(ActorTag);
+        Objects[Objects.size() - 1]->Tag(ActorTag);
         //Objects[Objects.size() - 1].autokill = true;
         if (Kthura::AutoMap) TotalRemap();
         RemapID();
@@ -720,7 +722,7 @@ namespace NSKthura {
         //Actors.push_back(KthuraActor::Spawn(this, x, y, wind, R, G, B, alpha, Dominance));
         //Actors[Actors.size() - 1].Tag(ActorTag);
         Objects.push_back(KthuraObject::Import(new KthuraActor(this, x, y, wind, R, G, B, alpha, Dominance)));
-        Objects[Objects.size() - 1].Tag(ActorTag);
+        Objects[Objects.size() - 1]->Tag(ActorTag);
         //Objects[Objects.size() - 1].autokill = true;
         if (Kthura::AutoMap) TotalRemap();
         RemapID();
@@ -732,7 +734,7 @@ namespace NSKthura {
         //if (O->EKind() == KthuraKind::Actor) {
             //for (int i = 0; i < Actors.size(); ++i) if (&Actors[i] == O) idx = i;
         //} else {
-        for (int i = 0; i < Objects.size(); ++i) if (&Objects[i] == O) idx = i;
+        for (int i = 0; i < Objects.size(); ++i) if (Objects[i].get() == O) idx = i;
         //}
         if (idx == -1) { Kthura::Throw("Object to kill not found!"); return; }
         auto EK = O->EKind();
@@ -758,7 +760,7 @@ namespace NSKthura {
     }
 
     void KthuraLayer::KillAllObjects() {
-        for (auto& O : Objects) O.Kill();
+        for (auto O : Objects) O->Kill();
         _TagMap.clear();
         ID_Map.clear();
         _LabelMap.clear();
@@ -790,7 +792,7 @@ namespace NSKthura {
     void KthuraLayer::HideButLabel(std::string label) {
         //for (auto& O : Objects) O.Visible(false);
         for (int i = 0; i < Objects.size(); i++) {
-            auto O = &Objects[i];
+            auto O = Objects[i];
             O->Visible(false);
         }
         ShowByLabel(label);
@@ -799,7 +801,7 @@ namespace NSKthura {
     void KthuraLayer::ShowButLabel(std::string label) {
         //for (auto& O : Objects) O.Visible(true);
         for (int i = 0; i < Objects.size(); i++) {
-            auto O = &Objects[i];
+            auto O = Objects[i];
             O->Visible(true);
         }
         HideByLabel(label);
@@ -808,8 +810,8 @@ namespace NSKthura {
     void KthuraLayer::RemoveActors() {
         std::vector<KthuraObject*> Dodenlijst;
         for (auto& O : Objects) {
-            if (O.EKind() == KthuraKind::Actor) {
-                Dodenlijst.push_back(&O);
+            if (O->EKind() == KthuraKind::Actor) {
+                Dodenlijst.push_back(O.get());
             }
         }
         for (auto& Slachtoffer : Dodenlijst) Kill(Slachtoffer);
@@ -969,6 +971,7 @@ namespace NSKthura {
                     if (key == "LAYER") { //kthload_case("LAYER":
                         obj = NULL;
                         curlayername = Upper(value);
+                        if (!Layers.count(curlayername)) Throw("Try to load data to a non-existent layer: \"" + curlayername + "\"");
                         curlayer = Layers[value].get();
                         curlayer->SetParent(this,curlayername);
 #ifdef Kthura_LoadChat
@@ -1090,10 +1093,12 @@ namespace NSKthura {
                         obj->ScaleY ( stoi(Trim(s[1])));
                     } // break;
                     kthload_case("BLEND") {
-                        if (stoi(value) != 0) {
-                            Throw("Alternate Blends are only supported in the BlitzMax version of Kthura!"); return;
+                        auto v = stoi(value);
+                        //if (stoi(value) != 0) {
+                            //Throw("Alternate Blends are only supported in the BlitzMax version of Kthura!"); return;
                             // Although when rading some documentation, it may be possible to support this in C++
-                        }
+                        //}
+                        obj->Blend(v);
                     } // break;
                     else {
                         if (prefixed(key, "DATA.")) {
@@ -1118,7 +1123,7 @@ namespace NSKthura {
 
     void Kthura::Load(std::string JCR, std::string Prefix) {
         auto J = jcr6::Dir(JCR);
-        if (JCR_Error != "") { Throw("JCR6 file \"" + JCR + "\" could notbe loaded.\nJCR6 reported: " + JCR_Error); return; }
+        if (JCR_Error != "" && JCR_Error!="Ok") { Throw("JCR6 file \"" + JCR + "\" could notbe loaded.\nJCR6 reported: " + JCR_Error); return; }
         Load(J, Prefix);
     }
 
@@ -1493,6 +1498,7 @@ namespace NSKthura {
     int KthuraObject::Alpha1000() { kthobjretf(Alpha1000); }
     float KthuraObject::TrueScaleX() { kthobjret(ScaleX / 1000); }
     float KthuraObject::TrueScaleY() { kthobjret(ScaleY / 1000); }
+    int KthuraObject::Blend() { kthobjret(Blend); }
     std::string KthuraObject::Kind() { if (A) return "Actor"; return O->Kind(); }
     KthuraKind KthuraObject::EKind() { if (A) return KthuraKind::Actor; return O->EKind(); }
     int KthuraObject::X() { kthobjretf(X); }
@@ -1527,6 +1533,7 @@ namespace NSKthura {
     void KthuraObject::R(int value) { kthobjdef(R); }
     void KthuraObject::G(int value) { kthobjdef(G); }
     void KthuraObject::B(int value) { kthobjdef(B); }
+    void KthuraObject::Blend(int value) { kthobjdef(Blend); }
     void KthuraObject::RotationDegrees(int value) { kthobjset(RotationDegrees); }
     
     KthuraAutoVisibleRect Kthura::AutoVisible{ 0, 0, 0, 0, false };
