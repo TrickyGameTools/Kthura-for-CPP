@@ -43,6 +43,8 @@ namespace NSKthura{
 		void DrawStretchedArea(KthuraObject* obj, int ix = 0, int iy = 0, int scrollx = 0, int scrolly = 0);
 		int ObjectWidth(KthuraObject* obj);
 		int ObjectHeight(KthuraObject* obj);
+		int ObjectWidth(std::shared_ptr<KthuraObject> obj);
+		int ObjectHeight(std::shared_ptr<KthuraObject> obj);
 		bool HasTexture(KthuraObject* obj);
 
 	};

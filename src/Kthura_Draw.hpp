@@ -17,8 +17,9 @@
 // misrepresented as being the original software.
 // 3. This notice may not be removed or altered from any source distribution.
 // EndLic
-#ifndef KTHURA_LOADED_DRAW
-#define KTHURA_LOADED_DRAW
+#pragma once
+//#ifndef KTHURA_LOADED_DRAW
+//#define KTHURA_LOADED_DRAW
 
 #include "Kthura_Core.hpp"
 
@@ -43,6 +44,9 @@ namespace NSKthura {
         KthuraAnimReset AnimReset = NULL;
         virtual int ObjectWidth(KthuraObject* obj) = 0;
         virtual int ObjectHeight(KthuraObject* obj) = 0;
+        virtual int ObjectWidth(std::shared_ptr<KthuraObject> obj)=0;
+        virtual int ObjectHeight(std::shared_ptr<KthuraObject> obj)=0;
+
         virtual bool HasTexture(KthuraObject* obj) = 0;
         // #endregion
 
@@ -62,4 +66,4 @@ namespace NSKthura {
         // #endregion
     };
 }
-#endif
+//#endif
