@@ -185,8 +185,8 @@ namespace NSKthura{
         TQSG_Color(obj->R(), obj->G(), obj->B());
         auto oldr = TQSG_Rotate();
         TQSG_Rotate(obj->RotationDegrees());
-        SetScale((double)obj->ScaleX()/1000, (double)obj->ScaleY()/1000);
-        GetTex(obj)->XDraw(obj->X()+ix-scrollx, obj->Y()+iy-scrolly,obj->AnimFrame());
+        SetScale((double)obj->ScaleX() / 1000, (double)obj->ScaleY() / 1000);
+        GetTex(obj)->XDraw(obj->X() + ix - scrollx, obj->Y() + iy - scrolly, obj->AnimFrame());
         SetScale(1, 1);
         TQSG_Rotate(oldr);
 #endif
