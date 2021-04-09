@@ -44,6 +44,8 @@ namespace NSKthura{
 	class KthuraActor;
 	class KthuraPathFinder;
 
+	typedef std::shared_ptr<KthuraObject> KthuraShObject;
+
 	typedef struct KthuraAutoVisibleRect {
 		int
 			bx,
@@ -109,6 +111,7 @@ namespace NSKthura{
 		int ScaleX = 1000, ScaleY = 1000;
 		int AnimSpeed = 0;
 		int AnimFrame = 0; 
+		int Blend = 0;
 			
 		KthuraLayer* GetParent();
 		float TrueScaleX();
@@ -255,6 +258,7 @@ namespace NSKthura{
 		int Alpha1000();
 		float TrueScaleX();
 		float TrueScaleY();
+		int Blend();
 		std::string Kind();
 		KthuraKind EKind();
 		int X();
@@ -291,6 +295,7 @@ namespace NSKthura{
 		void R(int value);
 		void G(int value);
 		void B(int value);
+		void Blend(int value);
 		
 		// Some general methods
 		void Animate(KthuraAnimReset RESET = NULL);
@@ -326,8 +331,8 @@ namespace NSKthura{
 
 
 		// Create and import
-		static KthuraObject Create(std::string Kind, KthuraLayer* p);
-		static KthuraObject Import(KthuraActor* Act);
+		static KthuraShObject Create(std::string Kind, KthuraLayer* p);
+		static KthuraShObject Import(KthuraActor* Act);
 	};
 	
 	class KthuraLayer{
@@ -350,7 +355,7 @@ namespace NSKthura{
 		int nextID();
 		int GridX{ 32 };
 		int GridY{ 32 };
-		std::vector<KthuraObject> Objects;
+		std::vector<KthuraShObject> Objects;
 		//std::vector<KthuraActor> Actors;
 		int CountObjects();
 		KthuraObject* ObjFIdx(int index);
