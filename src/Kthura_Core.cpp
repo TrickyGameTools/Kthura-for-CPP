@@ -436,6 +436,7 @@ namespace NSKthura {
     }
 
     bool NSKthura::KthuraLayer::HasTag(std::string Tag) {
+        if (parent->_ignorecase_tags) Tag = Upper(Tag);
         return _TagMap.count(Tag);
     }
 
@@ -1496,8 +1497,8 @@ namespace NSKthura {
     int KthuraObject::AnimFrame() { kthobjret(AnimFrame); }
     int KthuraObject::Alpha255() { kthobjretf(Alpha255); }
     int KthuraObject::Alpha1000() { kthobjretf(Alpha1000); }
-    float KthuraObject::TrueScaleX() { kthobjret(ScaleX / 1000); }
-    float KthuraObject::TrueScaleY() { kthobjret(ScaleY / 1000); }
+    float KthuraObject::TrueScaleX() { kthobjret(ScaleX / (float)1000); }
+    float KthuraObject::TrueScaleY() { kthobjret(ScaleY / (float)1000); }
     int KthuraObject::Blend() { kthobjret(Blend); }
     std::string KthuraObject::Kind() { if (A) return "Actor"; return O->Kind(); }
     KthuraKind KthuraObject::EKind() { if (A) return KthuraKind::Actor; return O->EKind(); }
