@@ -22,6 +22,8 @@
 // Please note that this is a deprecated feature, in order to prevent trouble on older
 // Maps written with the BlitzMax and C# versions of the Kthura editor.
 #define DEFAULT_CASESENSENSITIVE_LOAD
+
+#define BLOCKMAP_IGNOREOBSTACLES
     
 
 // C++
@@ -513,10 +515,12 @@ namespace NSKthura {
                 if (TY > BoundY) BoundY = TY;
                 break;
             case KthuraKind::Obstacle:
+#ifndef BLOCKMAP_IGNOREOBSTACLES
                 TX = floor((double)(X / GW));
                 TY = floor((double)(Y / GH));
                 if (TX > BoundX) BoundX = TX;
                 if (TY > BoundY) BoundY = TY;
+#endif
                 break;
             case KthuraKind::Pic:
                 TX = floor((double)(X / GW));
@@ -528,6 +532,8 @@ namespace NSKthura {
         }
         BlockMapBoundW = BoundX;
         BlockMapBoundH = BoundY;
+        BM_W = BoundX;
+        BM_H = BoundY;
         //BlockMap = new bool[BoundX + 1, BoundY + 1];
         _BlockMap.clear(); for (int i = 0; i < (BoundX + 1) * (BoundY + 1); ++i) _BlockMap.push_back(false); // Primitive, but for now all I got.
         // And now for the REAL work.		
@@ -564,6 +570,7 @@ namespace NSKthura {
                     }
                     break;
                 case KthuraKind::Obstacle:
+#ifndef BLOCKMAP_IGNOREOBSTACLES
                     TX = floor((double)(X / GW));
                     TY = floor((double)((Y - 1) / GH));
                     //BlockMap[TX, TY] = true;
@@ -584,6 +591,7 @@ namespace NSKthura {
                     for (AX = TX - (tiw); AX <= TX + (tiw); AX++) {
                         if (AX >= 0 && AX <= BoundX && TY <= BoundY && TY >= 0) _BlockMap[AX + (AY * (BoundX + 1))] = true; //BlockMap[AX, TY] = true;
                     }
+#endif
                     break;
                 case KthuraKind::Pic:
                     TX = floor((double)X / GW);
@@ -636,6 +644,7 @@ namespace NSKthura {
                     }
                     break;
                 case KthuraKind::Obstacle:
+                    #ifndef BLOCKMAP_IGNOREOBSTACLES
                     TX = (int)floor((double)(X / GW));
                     TY = (int)floor((double)((Y - 1) / GH));
                     //BlockMap[TX, TY] = false;
@@ -650,6 +659,7 @@ namespace NSKthura {
                     for (AX = TX - (tiw); AX <= TX + (tiw); AX++) {
                         if (AX >= 0 && AX <= BoundX && TY <= BoundY && TY >= 0) _BlockMap[AX + (AY * (BoundX + 1))] = false; //BlockMap[AX, TY] = true;
                     }
+#endif
                     break;
                 case KthuraKind::Pic:
                     TX = (int)floor((double)X / GW);
@@ -668,6 +678,7 @@ namespace NSKthura {
                     break;
                 }
             }
+            
         }
 
 
