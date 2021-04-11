@@ -258,6 +258,8 @@ namespace NSKthura {
         case KthuraKind::Actor:
             //Kthura::Throw("I cannot yet see the width of an actor");
             return GetTex(obj)->Height();
+        case KthuraKind::Pic:
+            return GetTex(obj)->Width();
         default:
             Kthura::Throw("Unknown object kind " + obj->Kind());
         }
@@ -282,6 +284,7 @@ namespace NSKthura {
         case KthuraKind::CustomItem:
             return 0;
         case KthuraKind::Actor:
+        case KthuraKind::Pic:
             //Kthura::Throw("I cannot yet see the width of an actor");
             return GetTex(obj)->Height();
         default:
