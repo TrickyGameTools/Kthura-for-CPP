@@ -56,6 +56,7 @@ namespace NSKthura {
         static DelDrawPoint DrawPivot; // Only needed in editors
         static DelDrawPoint DrawExit;
         static DelDrawPoint DrawCSpot;
+        static DelDrawPoint DrawCustom;
         static bool IgnoreVisibility ; // If set to true, invisible objects will still be shown.
        
         // Draw current layer

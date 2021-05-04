@@ -28,6 +28,7 @@ namespace NSKthura {
 	DelDrawPoint KthuraDraw::DrawPivot = NULL;
 	DelDrawPoint KthuraDraw::DrawExit = NULL;
 	DelDrawPoint KthuraDraw::DrawCSpot = NULL;
+    DelDrawPoint KthuraDraw::DrawCustom = NULL;
 	bool KthuraDraw::IgnoreVisibility = false;
 
 	void KthuraDraw::DrawMap(KthuraLayer *layer, int scrollx, int scrolly, int x, int y) {
@@ -82,6 +83,8 @@ namespace NSKthura {
                         if (DrawExit) DrawExit(obj, x, y, scrollx, scrolly); break;
                     case KthuraKind::CustomItem:
                         if (DrawCSpot) DrawCSpot(obj, x, y, scrollx, scrolly); break;
+                    case KthuraKind::Custom:
+                        if (DrawCustom) DrawCustom(obj, x, y, scrollx, scrolly); break;
                     default:
                         Kthura::Throw("Unknown drawing object kind: "+obj->Kind());
                         break;

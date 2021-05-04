@@ -160,7 +160,7 @@ namespace NSKthura {
         TT->XDraw(obj->X(), obj->Y());
 #elif defined(KTHURA_TQSG_TileVP)
         TQSG_Color(obj->R(), obj->G(), obj->B());
-        GetTexAuto(obj)->TileVP(obj->X() + ix - scrollx, obj->Y() + iy - scrolly, obj->W(), obj->H(), obj->AnimFrame(), -obj->insertx(), -obj->inserty());
+        GetTexAuto(obj)->TileVP(obj->X() + ix - scrollx, obj->Y() + iy - scrolly, obj->W(), obj->H(),  -obj->insertx(), -obj->inserty(), obj->AnimFrame());
 #else
         TQSG_Color(obj->R(), obj->G(), obj->B());
         GetTex(obj)->Tile(obj->X() + ix - scrollx, obj->Y() + iy - scrolly, obj->W(), obj->H(), obj->AnimFrame(), -obj->insertx(), -obj->inserty());
