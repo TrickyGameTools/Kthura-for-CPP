@@ -361,6 +361,8 @@ namespace NSKthura{
 		KthuraObject* ObjFIdx(int index);
 		std::map<int, KthuraObject*> GetIDMap();
 
+		KthuraShObject FindShObjByID(int index);
+
 		KthuraObject* TagMap(std::string Tag);
 		std::string TagList();
 		std::map<std::string, KthuraObject*> _DomMap; // not to be documented!

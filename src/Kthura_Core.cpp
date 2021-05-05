@@ -390,6 +390,10 @@ namespace NSKthura {
 		//    return &Actors[index];
 		return NULL;
 	}
+	KthuraShObject KthuraLayer::FindShObjByID(int index) {
+		for (auto o : Objects) if (o->ID() == index) return o;
+		return nullptr;
+	}
 	std::map<int, KthuraObject*> KthuraLayer::GetIDMap() {
 		if (ID_Map.size() == 0) {
 			RemapDominance();
