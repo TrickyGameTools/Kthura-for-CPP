@@ -24,7 +24,7 @@
 #define DEFAULT_CASESENSENSITIVE_LOAD
 
 #define BLOCKMAP_IGNOREOBSTACLES
-	
+#define BLOCKMAP_IGNOREPIC
 
 // C++
 #include <iostream>
@@ -599,8 +599,9 @@ namespace NSKthura {
 #endif
 					break;
 				case KthuraKind::Pic:
+#ifndef  BLOCKMAP_IGNOREPIC
 					TX = floor((double)X / GW);
-					TY = floor((double)Y / GH);
+					TY = floor((double)Y / GH);										
 					//BlockMap[TX, TY] = true;
 					_BlockMap[AX + (AY * (BoundX + 1))] = true;
 					if (KthuraDraw::DrawDriver->HasTexture(O.get())) {
@@ -612,6 +613,10 @@ namespace NSKthura {
 							if (AX >= 0 && AX <= BoundX && AY <= BoundY && AY >= 0) _BlockMap[AX + (AY * (BoundX + 1))] = true;// BlockMap[AX, AY] = true;
 						}
 					}
+#else
+//					O->ForcePassible(false);
+//					O->Impassible(false);
+#endif // ! BLOCKMAP_IGNOREPIC
 					break;
 				}
 			}
@@ -667,6 +672,7 @@ namespace NSKthura {
 #endif
 					break;
 				case KthuraKind::Pic:
+#ifndef  BLOCKMAP_IGNOREPIC
 					TX = (int)floor((double)X / GW);
 					TY = (int)floor((double)Y / GH);
 					//BlockMap[TX, TY] = false;
@@ -680,6 +686,7 @@ namespace NSKthura {
 							if (AX >= 0 && AX <= BoundX && AY <= BoundY && AY >= 0) _BlockMap[AX + (AY * (BoundX + 1))] = false;// BlockMap[AX, AY] = true;
 						}
 					}
+#endif
 					break;
 				}
 			}
