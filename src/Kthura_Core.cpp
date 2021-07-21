@@ -853,6 +853,13 @@ namespace NSKthura {
 	int KthuraLayer::BlockMapWidth() { return BM_W; }
 	int KthuraLayer::BlockMapHeight() { return BM_H; }
 
+	bool KthuraLayer::UsedTex(std::string Tex) {
+		Tex = Upper(Tex);
+		for (auto o : Objects)
+			if (Upper(o->Texture()) == Tex) return true;
+		return false;
+	}
+
 	
 
 
@@ -1173,6 +1180,12 @@ namespace NSKthura {
 
 	int Kthura::ID() {
 		return _id;
+	}
+
+	bool Kthura::UsedTex(std::string Tex) {
+		for (auto L : Layers)
+			if (L.second->UsedTex(Tex)) return true;
+		return false;
 	}
 
 	Kthura::Kthura() {

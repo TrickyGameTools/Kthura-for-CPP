@@ -397,6 +397,7 @@ namespace NSKthura{
 		std::string LabelMapDump();
 		int BlockMapWidth();
 		int BlockMapHeight();
+		bool UsedTex(std::string Tex);
 	};
 	
 	class Kthura {
@@ -439,6 +440,7 @@ namespace NSKthura{
 		/// </summary>
 		static KthuraAutoVisibleRect AutoVisible;
 		int ID();
+		bool UsedTex(std::string Tex);
 		Kthura();
 		~Kthura();
 	};
