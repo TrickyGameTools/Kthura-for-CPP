@@ -1,11 +1,3 @@
-# W.I.P Notice
-
-This project is still a work in progress...
-Do not expect anything here to work properly (if they work at all!)
-- When I last updated this file the core code does appear to compile. If it works or if any bugs came up in the process... I really do not know!
-- Working on loading maps now
-- Loader present
-
 # Kthura for C++
 
 ![Kthura](https://raw.githubusercontent.com/TrickyGameTools/KthuraTextEditor/master/Properties/Kthura.png)
@@ -20,7 +12,7 @@ To create a basic Kthura engine (without specific drivers) you need:
 Kthura_Core.cpp
 Kthura_Draw.cpp
 Kthura_Core.hpp
-Kthura_Draw.cpp
+Kthura_Draw.hpp
 
 These two can be optionally compiled if you desire to specifically use Kthura for SDL (which would require you to have SDL installed and in reach by your compiler, of course).
 Kthura_SDL_Driver.cpp
