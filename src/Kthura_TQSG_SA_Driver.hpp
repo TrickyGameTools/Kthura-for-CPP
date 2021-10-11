@@ -20,6 +20,10 @@ namespace NSKthura {
 		int ObjectWidth(std::shared_ptr<KthuraObject> obj);
 		int ObjectHeight(std::shared_ptr<KthuraObject> obj);
 		bool HasTexture(KthuraObject* obj);
+
+		static int Width();
+		static int Height();
+		static bool Used();
 	};
 
 }

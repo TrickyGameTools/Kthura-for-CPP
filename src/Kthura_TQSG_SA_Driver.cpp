@@ -20,16 +20,17 @@ namespace NSKthura {
 	typedef std::map<std::string, TQSG_AutoImage> TD_TexMap;
 	std::map<std::string, TD_TexMap> TexMap;
 
-	
+
 	static TQSG_AutoImage GetTex(KthuraObject* o) {
 		static int ID = -1;
-		static auto lay = o->GetParent();
-		static auto map = lay->GetParent();
-		static auto tex = Trim(o->Texture());
+		auto lay = o->GetParent();
+		auto map = lay->GetParent();
+		auto tex = Trim(o->Texture());
 		if (ID != map->ID()) TexMap.clear();
+		ID = map->ID();
 		if (tex == "") return nullptr;
-		if (TexMap[o->Kind()].count(o->Texture())) return TexMap[o->Kind()][tex];
-		KSADChat("Loading texture for " << o->Kind() << ": " << o->Texture());
+		if (TexMap[o->Kind()].count(tex)) return TexMap[o->Kind()][tex];
+		KSADChat("Loading texture for " << o->Kind() << ": " << tex);
 		if (!(map->TexDir->EntryExists(tex) || map->TexDir->DirectoryExists(tex))) {
 			Kthura::Throw("Texture \"" + tex + "\" not found!");
 			return nullptr;
@@ -48,7 +49,7 @@ namespace NSKthura {
 		Kthura::Throw("AnimReset not yet defined for this driver");
 	}
 
-	static inline void QuickDrawSettings(KthuraObject* obj,bool plus=false) {
+	static inline void QuickDrawSettings(KthuraObject* obj, bool plus = false) {
 		TQSG_SetBlend(TQSG_Blend::ALPHA);
 		TQSG_SetAlpha(obj->Alpha255());
 		TQSG_Color(obj->R(), obj->G(), obj->B());
@@ -63,13 +64,14 @@ namespace NSKthura {
 		if (KthuraDraw::DrawDriver) delete KthuraDraw::DrawDriver;
 		Kthura_Draw_TQSG_SA_Driver* Me = new Kthura_Draw_TQSG_SA_Driver();
 		KthuraDraw::DrawDriver = Me;
+		KthuraScreen = TQSG_CreateAS(w, h);
 		Me->AnimReset = AS_AnimReset;
 	}
 
 	void Kthura_Draw_TQSG_SA_Driver::DrawTiledArea(KthuraObject* obj, int ix, int iy, int scrollx, int scrolly) {
 		auto Tex = GetTex(obj);
 		QuickDrawSettings(obj);
-		KthuraScreen->Tile(Tex,obj->X() + ix - scrollx, obj->Y() + iy - scrolly, obj->W(), obj->H(), -obj->insertx(), -obj->inserty(), obj->AnimFrame());
+		KthuraScreen->Tile(Tex, obj->X() + ix - scrollx, obj->Y() + iy - scrolly, obj->W(), obj->H(), -obj->insertx(), -obj->inserty(), obj->AnimFrame());
 	}
 
 	void Kthura_Draw_TQSG_SA_Driver::DrawRect(KthuraObject* obj, int ix, int iy, int scrollx, int scrolly) {
@@ -79,7 +81,7 @@ namespace NSKthura {
 
 	void Kthura_Draw_TQSG_SA_Driver::DrawObstacle(KthuraObject* obj, int ix, int iy, int scrollx, int scrolly) {
 		auto Tex = GetTex(obj);
-		QuickDrawSettings(obj,true);
+		QuickDrawSettings(obj, true);
 		KthuraScreen->Draw(Tex, obj->X() + ix - scrollx, obj->Y() + iy - scrolly);
 	}
 
@@ -91,7 +93,7 @@ namespace NSKthura {
 			obj->UpdateMoves();
 			QuickDrawSettings(obj);
 			if (obj->AnimFrame() >= Tex->Frames()) obj->AnimFrame(0);
-			KthuraScreen->XDraw(Tex,obj->X() + ix - scrollx, obj->Y() + iy - scrolly, obj->AnimFrame());
+			KthuraScreen->XDraw(Tex, obj->X() + ix - scrollx, obj->Y() + iy - scrolly, obj->AnimFrame());
 			SetScale(1, 1);
 			TQSG_RotateRAD(0);
 			TQSG_SetAlpha(255);
@@ -164,7 +166,7 @@ namespace NSKthura {
 			return GetTex(obj)->H();
 		default:
 			Kthura::Throw("Unknown object kind " + obj->Kind());
-		}		
+		}
 		return 0;
 	}
 
@@ -180,6 +182,11 @@ namespace NSKthura {
 		// TODO: Make this happen!
 		return false;
 	}
+
+	int Kthura_Draw_TQSG_SA_Driver::Width() { return KthuraScreen->Width(); }
+	int Kthura_Draw_TQSG_SA_Driver::Height() { return KthuraScreen->Height(); }
+	bool Kthura_Draw_TQSG_SA_Driver::Used() { return (bool)KthuraScreen; }
+
 
 	void DrawRect(KthuraObject* obj, int ix = 0, int iy = 0, int scrollx = 0, int scrolly = 0) {
 		QuickDrawSettings(obj);
