@@ -1,7 +1,7 @@
 // Lic:
 // src/Kthura_SDL_Driver.cpp
 // Kthura - Driver to make Kthura use SDL
-// version: 21.03.27
+// version: 21.10.11
 // Copyright (C) 2020, 2021 Jeroen P. Broks
 // This software is provided 'as-is', without any express or implied
 // warranty.  In no event will the authors be held liable for any damages
@@ -84,7 +84,24 @@ namespace NSKthura {
         KSDT[tag].LastMapID = Map->ID();
         //KSDT[tag].Img.Create(*(Map->TexDir), tex);
         KSDT[tag].Img = TQSG_LoadAutoImage(*(Map->TexDir), tex);
-        if (prefixed(tag, "Obstacle::") || prefixed(tag, "Actor::")) KSDT[tag].Img->HotBottomCenter();
+        if (prefixed(tag, "Obstacle::") || prefixed(tag, "Actor::")) {
+            auto hot = StripExt(tex); hot += ".hot";
+            auto ok{ false };
+            cout << Map->TexDir->EntryExists(hot) << ">" << hot << endl;
+            if (Map->TexDir->EntryExists(hot)) {
+                auto hotstring{ Trim(Map->TexDir->String(hot)) };
+                auto hotspot{ TrickyUnits::Split(hotstring,',') };
+                if (hotspot.size() < 2) {
+                    cout << "ERROR! Incorrect hotspot data! (" << hot << ")\n";
+                        ok = false;
+                } else {
+                    cout << "= Autohotspot: (" << hotspot[0] << "," << hotspot[1] << ")\n";
+                    KSDT[tag].Img->Hot(stoi(hotspot[0]), stoi(hotspot[1]));
+                    ok = true;
+                }
+            } 
+            if (!ok){ KSDT[tag].Img->HotBottomCenter(); }
+        }
         // remove texture which were not used in a too long time.
         actions = (actions + 1) % 250;
         if (!actions) {
