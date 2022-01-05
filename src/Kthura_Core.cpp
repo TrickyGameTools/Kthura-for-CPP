@@ -124,6 +124,9 @@ namespace NSKthura {
 		_Tag = newtag;
 		if (Kthura::AutoMap) parent->RemapTags();
 	}
+	void KthuraRegObject::TagNoRemap(std::string newtag) {
+		_Tag = newtag;
+	}
 	std::string KthuraRegObject::Tag() {
 		return _Tag;
 	}
@@ -474,9 +477,17 @@ namespace NSKthura {
 			auto ObjTag = Obj->Tag();
 			if (parent->_ignorecase_tags) ObjTag = Upper(ObjTag);
 			if (ObjTag != "") {
-				if (_TagMap.count(ObjTag))
-					Kthura::Throw("Duplicate tag \"" + ObjTag + "\" (Layer:" + Obj->GetParent()->GetCreationName() + ". Kind: "+Obj->Kind()+")");
-				else
+				if (_TagMap.count(ObjTag)) {
+					if (parent->_autoretag) {
+						int nti{ 0 };
+						string nt;
+						do { nt = ObjTag + "__" + to_string(++nti) + "___"; } while (_TagMap.count(nt));
+						Obj->TagNoRemap(nt);
+						_TagMap[nt] = Obj;
+					} else {
+						Kthura::Throw("Duplicate tag \"" + ObjTag + "\" (Layer:" + Obj->GetParent()->GetCreationName() + ". Kind: " + Obj->Kind() + ")");
+					}
+				} else
 					_TagMap[ObjTag] = Obj;
 			}
 		}
@@ -795,7 +806,7 @@ namespace NSKthura {
 	}
 
 	void KthuraLayer::HideByLabel(std::string label) {
-		if (!_LabelMap.count(label));
+		if (!_LabelMap.count(label)) return;
 		auto& lst = _LabelMap[label];
 		for (auto O : lst) {
 			O->Visible(false);
@@ -803,7 +814,7 @@ namespace NSKthura {
 	}
 
 	void KthuraLayer::ShowByLabel(std::string label) {
-		if (!_LabelMap.count(label));
+		if (!_LabelMap.count(label)) return;
 		auto& lst = _LabelMap[label];
 #ifdef HideAndShowDebug
 		cout << "ShowByLabel:> " << label << "; This should make me show " << lst.size() << " objects! Here goes!\n";
@@ -1015,6 +1026,8 @@ namespace NSKthura {
 					readlayers = true;
 				else if (l == "__END")
 					readlayers = false;
+				else if (l == "AUTORETAG")
+					_autoretag = true;
 				else if (readlayers) {
 					this->NewLayer(Upper(l)); // Better?
 					//Layers[Upper(l)].GridX += 0; // Just forces to create the layer... Had to do something!
@@ -1603,6 +1616,7 @@ namespace NSKthura {
 	void KthuraObject::X(int value) { if (A) A->O.X(value); else O->X(value); }
 	void KthuraObject::Y(int value) { if (A) A->O.Y(value); else O->Y(value); }
 	void KthuraObject::Tag(std::string value) { kthobjset(Tag); }
+	void KthuraObject::TagNoRemap(std::string value) { kthobjset(TagNoRemap);  }
 	void KthuraObject::Dominance(int value) { kthobjset(Dominance); }
 	void KthuraObject::Labels(std::string value) { kthobjset(Labels); }
 	void KthuraObject::ForcePassible(bool value) { kthobjset(ForcePassible); }

@@ -128,6 +128,7 @@ namespace NSKthura{
 		void Y(int newy);
 		int Y();
 		void Tag(std::string newtag);
+		void TagNoRemap(std::string newtag);
 		std::string Tag();
 		void Dominance(int newdom);
 		int Dominance();
@@ -284,6 +285,7 @@ namespace NSKthura{
 		void X(int value);
 		void Y(int value);
 		void Tag(std::string value);
+		void TagNoRemap(std::string newtag);
 		void Dominance(int value);
 		void Labels(std::string value);
 		void ForcePassible(bool value);
@@ -406,6 +408,7 @@ namespace NSKthura{
 		static int countup;
 		int _id;
 	public:
+		bool _autoretag{ false };
 		bool _ignorecase_tags{ true }; // NEVER access directly! 
 		bool _ignorecase_labels{ true };// NEVER access directly!
 		///<summary>NEVER, and I repeat NEVER address the Layers map directly unless you know what you are doing!</summary>
@@ -421,6 +424,7 @@ namespace NSKthura{
 		void KillMap();
 		void Load(jcr6::JT_Dir& JCR, std::string Prefix = "");
 		void Load(std::string JCR, std::string Prefix = "");
+		
 		void Remap();
 		// This feature removes all actors on ALL layers
 		void RemoveActors();
