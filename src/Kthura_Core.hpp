@@ -398,6 +398,7 @@ namespace NSKthura{
 		int BlockMapWidth();
 		int BlockMapHeight();
 		bool UsedTex(std::string Tex);
+		void Relabel(int x, int y, int w, int h, std::string label, bool overwrite = false);
 	};
 	
 	class Kthura {

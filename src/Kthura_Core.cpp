@@ -860,6 +860,49 @@ namespace NSKthura {
 		return false;
 	}
 
+	void KthuraLayer::Relabel(int x, int y, int w, int h, std::string label, bool overwrite) {
+		bool
+			anydone{ false },
+			automap{ Kthura::AutoMap };
+		Kthura::AutoMap = false; // Performance!
+		for (auto o : Objects) {
+			bool InArea{ false };
+			switch (o->EKind()) {
+			case KthuraKind::Zone:
+			case KthuraKind::StretchedArea:
+			case KthuraKind::Rect:
+			case KthuraKind::TiledArea:
+				InArea = InArea || (o->X()+o->W() >= x && o->Y()+o->H() >= y && o->X() <= x + w && o->Y()+o->H() <= y + h);
+				InArea = InArea || (o->X() >= x || o->Y() >= y) && (o->X() <= x + w || o->Y() <= y + h);
+				// fallthrough
+			case KthuraKind::Actor:
+			case KthuraKind::Obstacle:
+			case KthuraKind::Pivot:
+			case KthuraKind::Exit:
+			case KthuraKind::Custom:
+			case KthuraKind::CustomItem:
+				InArea = InArea || (o->X() >= x && o->Y() >= y && o->X() <= x + w && o->Y() <= y + h);
+				break;
+			default:
+				Kthura::Panic("Relabel: Unknown kind code for object #" + std::to_string(o->ID()) + " (" + std::to_string((int)o->EKind()));
+				return;
+			}
+			if (InArea) {
+				anydone = true;
+				if (overwrite)
+					o->Labels( label);
+				else {
+					auto l{ o->Labels() };
+					if (l.size()) l += ",";
+					l += label;
+					o->Labels(l);
+				}
+			}
+			if (automap && anydone) RemapLabels();
+			Kthura::AutoMap = automap;
+		}
+	}
+
 	
 
 
