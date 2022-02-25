@@ -203,6 +203,7 @@ namespace NSKthura {
 		if (kind != "Obstacle" && kind != "Pic" && kind != "TiledArea" && kind != "StrechedArea") return;
 		if (AnimSpeed() < 0) return;
 		AnimFrameSkip++;
+		if (RESET) RESET(this);
 		if (AnimFrameSkip >= AnimSpeed()) {
 			AnimFrameSkip = 0;
 			AnimFrame(AnimFrame() + 1);
@@ -1603,7 +1604,7 @@ namespace NSKthura {
 	bool KthuraObject::Impassible() { kthobjretf(Impassible); }
 	int KthuraObject::RotationDegrees() { kthobjretf(RotationDegrees); }
 	double KthuraObject::RotationRadians() { kthobjretf(RotationRadians); }
-	void KthuraObject::Texture(std::string value) {         kthobjdef(Texture);     }
+	void KthuraObject::Texture(std::string value) {  std::string OTex{ Texture() }; kthobjdef(Texture); if (Upper(OTex) != Upper(value)) {AnimFrame(0); } }
 	void KthuraObject::Visible(bool value) { kthobjdef(Visible); }
 	void KthuraObject::W(int value) { kthobjdef(w); }
 	void KthuraObject::H(int value) { kthobjdef(h); }

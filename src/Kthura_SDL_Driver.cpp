@@ -169,7 +169,11 @@ namespace NSKthura {
 		TQSG_Color(255, 0, 0);
 		TQSG_Rect(obj->X() + ix - scrollx, obj->Y() + iy - scrolly, obj->w, obj->h);
 #else
-		TQSG_SetBlend(TQSG_Blend::ALPHA);
+		if (obj->Blend() == 0)
+			TQSG_SetBlend(TQSG_Blend::ALPHA);
+		else
+			//TQSG_SetBlend((TQSG_Blend)obj->Blend());
+			TQSG_SetBlitzBlend(obj->Blend());
 		TQSG_SetAlpha(obj->Alpha255());
 #ifdef KTHURA_TQSG_PreRenderTiled
 		auto TT = GetTex(obj, obj->W(), obj->H(), obj->insertx(), obj->inserty());
@@ -202,7 +206,7 @@ namespace NSKthura {
 		TQSG_Color(obj->R(), obj->G(), obj->B());
 		auto oldr = TQSG_Rotate();
 		TQSG_Rotate(obj->RotationDegrees());
-		SetScale((double)obj->ScaleX() / 1000, (double)obj->ScaleY() / 1000);
+		SetScale((double)obj->ScaleX() / 1000, (double)obj->ScaleY() / 1000);		
 		GetTex(obj)->XDraw(obj->X() + ix - scrollx, obj->Y() + iy - scrolly, obj->AnimFrame());
 		SetScale(1, 1);
 		TQSG_Rotate(oldr);
