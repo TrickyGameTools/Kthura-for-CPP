@@ -407,7 +407,9 @@ namespace NSKthura{
 	private:
 		static int countup;
 		int _id;
+		std::map<std::string, std::vector<char>>Unknown{};
 	public:
+		std::map<std::string, std::vector<char>>* UnknownData();
 		bool _autoretag{ false };
 		bool _ignorecase_tags{ true }; // NEVER access directly! 
 		bool _ignorecase_labels{ true };// NEVER access directly!
@@ -435,6 +437,11 @@ namespace NSKthura{
 		static void (*Panic)(std::string msg);
 		static KthuraPathFinder* PathFinder;
 		static bool AutoMap;
+		/// <summary>
+		/// When set to 'true' Kthura will load data in a Kthura Map from entries it doesn't understand and save them the same way they were loaded.
+		/// This may allow more enhancement based on the engine you use Kthura Maps for. Please note that since this data can also be binary export to XML and such will not be possible.
+		/// </summary>
+		static bool AllowUnknown;
 		/// <summary>
 		/// When set to false, instructions in mapfiles not understood will be ignored. Other wise errors will be reported based on the panic setting!
 		/// </summary>

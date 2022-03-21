@@ -923,7 +923,9 @@ namespace NSKthura {
 
 
 	bool Kthura::AutoMap = true;
+	bool Kthura::AllowUnknown = true;
 	void (*Kthura::Panic) (std::string err) = NULL;
+	std::map<std::string, std::vector<char>>* Kthura::UnknownData() { return &Unknown; }
 	KthuraLayer* Kthura::Layer(std::string lay) {
 		lay = Upper(lay);
 		if (!Layers.count(lay)) { Throw("No layer called \"" + lay + "\" found!"); return NULL; }
@@ -1008,9 +1010,11 @@ namespace NSKthura {
 		};
 		*/
 		using namespace std;
+		// Data
 		auto m = sourcedir.StringMap(Prefix + "Data");
 		for (auto K : m)
 			MetaData[K.first] = K.second;
+		// Objects
 		auto olines = sourcedir.Lines(Prefix + "Objects");
 		auto readlayers = false;
 		bool tempautomap = AutoMap; AutoMap = false; // In order to fasten up the process this will be off temporarily. It can be turned on again, afterward!            
@@ -1205,6 +1209,16 @@ namespace NSKthura {
 		AutoMap = tempautomap;
 		//foreach(KthuraLayer lay in ret.Layers.Values) lay.TotalRemap();
 		for (auto ilay : Layers) { ilay.second->TotalRemap(); }
+		// Unknwon if allowed
+		if (AllowUnknown) {
+			Unknown.clear();
+			for (auto ku : sourcedir.Entries()) {
+				auto UP = Upper(Prefix);
+				if (prefixed(ku.first, UP) && ku.first != UP + "OBJECTS" && ku.first != UP + "SETTINGS" && ku.first != UP + "DATA") {
+					Unknown[right(ku.second.Entry(), ku.second.Entry().size() - UP.size())] = sourcedir.Characters(ku.first);
+				}
+			}
+		}
 		//return ret;
 	}
 	

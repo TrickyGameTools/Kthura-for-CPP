@@ -54,6 +54,10 @@ namespace NSKthura {
 
 
 	void KthuraSave(Kthura* Map, jcr6::JT_Create* Resource, std::string Prefix, std::string Storage) {
+		// Save the unknown first (this is a kind of security measure. This way true Kthura data will always overwrite unknown data. Kthura users uing their own data should be aware of that)
+		if (Kthura::AllowUnknown) {
+			for (auto ku : (*Map->UnknownData())) Resource->AddCharacters(Prefix+ku.first, ku.second, Storage);
+		}
 		
 		auto UseStorage = Storage;
 		if (UseStorage == "") UseStorage = Trim(Map->Options.Value("Save", "Storage"));
