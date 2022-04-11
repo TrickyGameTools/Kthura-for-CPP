@@ -26,6 +26,8 @@
 #define BLOCKMAP_IGNOREOBSTACLES
 #define BLOCKMAP_IGNOREPIC
 
+#undef DEBUG_CASEINSENSITVETAGS
+
 // C++
 #include <iostream>
 
@@ -447,7 +449,14 @@ namespace NSKthura {
 	}
 
 	bool NSKthura::KthuraLayer::HasTag(std::string Tag) {
+#ifdef DEBUG_CASEINSENSITVETAGS
+		cout << "HasTag(" << Tag << ") Ignore case: " << parent->_ignorecase_tags;
+#endif
 		if (parent->_ignorecase_tags) Tag = Upper(Tag);
+#ifdef DEBUG_CASEINSENSITVETAGS
+		cout << "'; \tChecking: " << Tag << ";\tResult: " << _TagMap.count(Tag) << endl;
+		for (auto f : _TagMap) cout << "This layer has tag: " << f.first << endl;
+#endif
 		return _TagMap.count(Tag);
 	}
 
@@ -471,6 +480,7 @@ namespace NSKthura {
 		}
 	}
 	void KthuraLayer::RemapTags() {
+		parent->_ignorecase_tags = Upper(parent->Options.Value("IgnoreCase", "Tags")) == "YES";
 		_TagMap.clear();
 		//        for (auto& Obj : Objects) {
 		for (int i = 0; i < CountObjects(); i++) {
@@ -495,6 +505,7 @@ namespace NSKthura {
 	}
 
 	void KthuraLayer::RemapLabels() {
+		parent->_ignorecase_labels = Upper(parent->Options.Value("IgnoreCase", "Labels")) == "YES";
 		_LabelMap.clear();
 		//        for (auto& Obj : Objects) {
 		for (int i = 0; i < CountObjects(); i++) {
@@ -716,6 +727,8 @@ namespace NSKthura {
 	}
 
 	void KthuraLayer::TotalRemap() {
+		parent->_ignorecase_labels = Upper(parent->Options.Value("IgnoreCase", "Labels")) == "YES";
+		parent->_ignorecase_tags = Upper(parent->Options.Value("IgnoreCase", "Tags")) == "YES";
 		RemapID();
 		RemapDominance();
 		RemapTags();
