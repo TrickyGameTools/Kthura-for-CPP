@@ -407,6 +407,16 @@ namespace NSKthura {
 		}
 		return ID_Map;
 	}
+
+	std::map<int, KthuraObject*>* KthuraLayer::GetIDPMap() {
+		if (ID_Map.size() == 0) {
+			RemapDominance();
+			RemapID();
+		}
+		return &ID_Map;
+	}
+
+
 	KthuraObject* KthuraLayer::TagMap(std::string Tag) {
 		if (parent->_ignorecase_tags) Tag = Upper(Tag);
 		if (_TagMap.count(Tag)) return _TagMap[Tag];
@@ -429,7 +439,8 @@ namespace NSKthura {
 	std::vector<KthuraObject*>* KthuraLayer::LabelMap(std::string label) {
 		if (parent->_ignorecase_labels) label = Upper(label);
 		if (_LabelMap.count(label)) return &_LabelMap[label];
-		return &std::vector<KthuraObject*>();
+		//return &std::vector<KthuraObject*>();
+		return nullptr;
 	}
 
 	KthuraObject* KthuraLayer::LastObject() {

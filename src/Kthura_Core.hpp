@@ -362,6 +362,7 @@ namespace NSKthura{
 		int CountObjects();
 		KthuraObject* ObjFIdx(int index);
 		std::map<int, KthuraObject*> GetIDMap();
+		std::map<int, KthuraObject*>* GetIDPMap();
 
 		KthuraShObject FindShObjByID(int index);
 
