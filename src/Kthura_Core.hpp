@@ -173,6 +173,8 @@ namespace NSKthura{
 		KthuraObject* parentobj = NULL;
 		std::string _Kind{ "Actor" };
 		int _id = 0;
+		int _ox = 0;
+		int _oy = 0;
 	public:
 		KthuraRegObject O;
 		//public object DriverTextureObject = null; // To be defined by the graphics driver for its own needs
@@ -186,6 +188,7 @@ namespace NSKthura{
 		bool Moving = false;
 		bool MoveIgnoreBlock = false;
 		bool AutoWind = true;
+		//int AutoDom = 30;
 		int UnMoveTimer = 4;
 		int MoveX = 0, MoveY = 0;
 		int MoveSkip = 4;
@@ -209,6 +212,7 @@ namespace NSKthura{
 		void MoveTo(KthuraObject* obj);
 		void MoveTo(std::string Tag);
 		void UpdateMoves();
+		//void UpdateAutoDom(int force = 0);
 		std::string Kind();
 		KthuraKind EKind();
 		KthuraActor (KthuraLayer* parent, std::string spot);
@@ -218,6 +222,8 @@ namespace NSKthura{
 		KthuraLayer* GetParent();
 		KthuraObject* GetObject();
 		void SetObject(KthuraObject* o);
+		//static void AllAutoDom();
+		//bool DoAutoDom;
 	};
 
 	class KthuraObject {
@@ -317,10 +323,12 @@ namespace NSKthura{
 		bool Moving();
 		bool NotInMotionThen0();
 		std::string Wind();
+		int AutoDom();
 		void Walking(bool value);
 		void Moving(bool value);
 		void NotInMotionThen0(bool value);
 		void Wind(std::string value);
+		void AutoDom(int i);
 
 		// Actors only Methods
 		void UpdateMoves();

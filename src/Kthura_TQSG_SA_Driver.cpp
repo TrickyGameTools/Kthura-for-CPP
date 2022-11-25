@@ -197,6 +197,11 @@ namespace NSKthura {
 		return ObjectHeight(obj.get());
 	}
 
+	int Kthura_Draw_TQSG_SA_Driver::TexWidth(KthuraObject* obj) { return GetTex(obj)->W(); }
+	int Kthura_Draw_TQSG_SA_Driver::TexHeight(KthuraObject* obj) { return GetTex(obj)->H(); }
+	int Kthura_Draw_TQSG_SA_Driver::TexWidth(std::shared_ptr<KthuraObject> obj) { return TexWidth(obj.get()); }
+	int Kthura_Draw_TQSG_SA_Driver::TexHeight(std::shared_ptr<KthuraObject> obj) { return TexHeight(obj.get()); }
+
 	bool Kthura_Draw_TQSG_SA_Driver::HasTexture(KthuraObject* obj) {
 		// TODO: Make this happen!
 		return false;

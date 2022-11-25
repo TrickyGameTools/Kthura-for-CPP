@@ -317,6 +317,12 @@ namespace NSKthura {
 	int Kthura_Draw_SDL_Driver::ObjectWidth(std::shared_ptr<KthuraObject> obj) { return ObjectWidth(obj.get()); }
 	int Kthura_Draw_SDL_Driver::ObjectHeight(std::shared_ptr<KthuraObject> obj) { return ObjectHeight(obj.get()); }
 
+	int Kthura_Draw_SDL_Driver::TexWidth(KthuraObject* obj) { return GetTex(obj)->Width(); }
+	int Kthura_Draw_SDL_Driver::TexHeight(KthuraObject* obj) { return GetTex(obj)->Height(); }
+	int Kthura_Draw_SDL_Driver::TexWidth(std::shared_ptr<KthuraObject> obj) { return TexWidth(obj.get()); }
+	int Kthura_Draw_SDL_Driver::TexHeight(std::shared_ptr<KthuraObject> obj) { return TexHeight(obj.get()); }
+
+
 	bool Kthura_Draw_SDL_Driver::HasTexture(KthuraObject* obj) {
 		// TODO: Make this happen!
 		return false;

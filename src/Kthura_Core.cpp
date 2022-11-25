@@ -117,7 +117,7 @@ namespace NSKthura {
 	void KthuraRegObject::Ym(int sub) { Y(Y() - sub); }
 	void KthuraRegObject::Y(int newy) {
 		_y = newy;
-		if (Kthura::AutoMap) parent->RemapDominance();
+		if (Kthura::AutoMap) parent->RemapDominance();				
 	}
 	int KthuraRegObject::Y() {
 		return _y;
@@ -303,6 +303,7 @@ namespace NSKthura {
 	void KthuraObject::Moving(bool value) { kthactdef(Moving); }
 	void KthuraObject::NotInMotionThen0(bool value) { kthactdef(NotInMotionThen0); }
 	void KthuraObject::Wind(std::string value) { kthactdef(Wind); }
+	//void KthuraObject::AutoDom(int value) { kthactdef(AutoDom); }
 	void KthuraObject::MoveTo(int x, int y) { if (!A) Kthura::Throw("Actors-Only method: UpdateMoves()"); A->MoveTo(x, y); }
 	void KthuraObject::MoveTo(KthuraObject* obj) { if (!A) Kthura::Throw("Actors-Only method: UpdateMoves()"); A->MoveTo(obj); }
 	void KthuraObject::MoveTo(std::string ObjTag) { MoveTo(GetParent()->TagMap(ObjTag)); }
@@ -312,6 +313,7 @@ namespace NSKthura {
 	bool KthuraObject::Moving() { return A && A->Moving; }
 	bool KthuraObject::NotInMotionThen0() { kthactret(NotInMotionThen0); }
 	string KthuraObject::Wind() { kthactret(Wind); }
+	//int KthuraObject::AutoDom() { kthactret(AutoDom); }
 	void KthuraObject::UpdateMoves() { if (!A) Kthura::Throw("Actors-Only method: UpdateMoves()"); A->UpdateMoves(); }
 	void KthuraObject::Xm(int value) { kthobjset(Xm); }
 	void KthuraObject::Yp(int value) { kthobjset(Yp); }
@@ -548,6 +550,7 @@ namespace NSKthura {
 			case KthuraKind::TiledArea:
 			case KthuraKind::Zone:
 			case KthuraKind::StretchedArea:
+			case KthuraKind::Rect:
 				TX = ceil((double)((X + W) / GW));
 				TY = ceil((double)((Y + H) / GH));
 				if (TX > BoundX) BoundX = TX;
@@ -587,6 +590,7 @@ namespace NSKthura {
 				case KthuraKind::TiledArea:
 				case KthuraKind::Zone:
 				case KthuraKind::StretchedArea:
+				case KthuraKind::Rect:
 					//Kthura.EDITTORLOG($"Working on Impassible {O.kind} {O.Tag}");
 					TX = floor((double)X / GW);
 					TY = floor((double)Y / GH);
@@ -831,6 +835,7 @@ namespace NSKthura {
 	}
 
 	void KthuraLayer::HideByLabel(std::string label) {
+		if (parent->_ignorecase_labels) label = Upper(label);
 		if (!_LabelMap.count(label)) return;
 		auto& lst = _LabelMap[label];
 		for (auto O : lst) {
@@ -839,6 +844,7 @@ namespace NSKthura {
 	}
 
 	void KthuraLayer::ShowByLabel(std::string label) {
+		if (parent->_ignorecase_labels) label = Upper(label);
 		if (!_LabelMap.count(label)) return;
 		auto& lst = _LabelMap[label];
 #ifdef HideAndShowDebug
@@ -1509,7 +1515,23 @@ namespace NSKthura {
 				O.AnimFrame++;
 			}
 		} else if (WalkingIsInMotion && (!Walking) && (NotInMotionThen0)) O.AnimFrame = 0;
+		//UpdateAutoDom();
 	}
+
+	/*
+	void KthuraActor::UpdateAutoDom(int force) {
+		auto value{ force };
+		if (!force) value = AutoDom;
+			//cout << "DEBUG-AUTODOM: " << (abs(_oy - parentobj->X())) << "/" << value << endl; // debug only!
+		if (value) {
+			if (abs(_oy - parentobj->X()) >= value) {
+				parent->RemapDominance();
+			}
+		}
+		_ox = parentobj->X();
+		_oy = parentobj->Y();
+	}
+	*/
 
 	std::string KthuraActor::Kind() { return "Actor"; }
 	KthuraKind KthuraActor::EKind() { return KthuraKind::Actor; }
@@ -1528,6 +1550,12 @@ namespace NSKthura {
 	KthuraObject* KthuraActor::GetObject() { return parentobj; }
 
 	void KthuraActor::SetObject(KthuraObject* o) { parentobj = o; }
+
+	/*
+	void KthuraActor::AllAutoDom() {
+		auto doit{ false };		
+	}
+	//*/
 
 	
 
@@ -1653,7 +1681,7 @@ namespace NSKthura {
 	void KthuraObject::AnimSpeed(int value) { kthobjdef(AnimSpeed); }
 	void KthuraObject::AnimFrame(int value) { kthobjdef(AnimFrame); }
 	void KthuraObject::X(int value) { if (A) A->O.X(value); else O->X(value); }
-	void KthuraObject::Y(int value) { if (A) A->O.Y(value); else O->Y(value); }
+	void KthuraObject::Y(int value) { if (A) { A->O.Y(value); /*A->UpdateAutoDom();*/ } else O->Y(value); }
 	void KthuraObject::Tag(std::string value) { kthobjset(Tag); }
 	void KthuraObject::TagNoRemap(std::string value) { kthobjset(TagNoRemap);  }
 	void KthuraObject::Dominance(int value) { kthobjset(Dominance); }

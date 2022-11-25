@@ -38,6 +38,10 @@ namespace NSKthura {
 		int ObjectHeight(KthuraObject* obj);
 		int ObjectWidth(std::shared_ptr<KthuraObject> obj);
 		int ObjectHeight(std::shared_ptr<KthuraObject> obj);
+		int TexWidth(KthuraObject* obj);
+		int TexHeight(KthuraObject* obj);
+		int TexWidth(std::shared_ptr<KthuraObject> obj);
+		int TexHeight(std::shared_ptr<KthuraObject> obj);
 		bool HasTexture(KthuraObject* obj);
 
 		static int Width();

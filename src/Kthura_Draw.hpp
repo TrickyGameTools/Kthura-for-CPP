@@ -46,6 +46,10 @@ namespace NSKthura {
         virtual int ObjectHeight(KthuraObject* obj) = 0;
         virtual int ObjectWidth(std::shared_ptr<KthuraObject> obj)=0;
         virtual int ObjectHeight(std::shared_ptr<KthuraObject> obj)=0;
+        virtual int TexWidth(KthuraObject* obj) = 0;
+        virtual int TexHeight(KthuraObject* obj) = 0;
+        virtual int TexWidth(std::shared_ptr<KthuraObject> obj) = 0;
+        virtual int TexHeight(std::shared_ptr<KthuraObject> obj) = 0;
 
         virtual bool HasTexture(KthuraObject* obj) = 0;
         // #endregion
