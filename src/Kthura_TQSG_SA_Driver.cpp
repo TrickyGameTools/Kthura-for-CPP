@@ -51,7 +51,7 @@ namespace NSKthura {
 		if (TexMap[o->Kind()].count(tex)) return TexMap[o->Kind()][tex];
 		KSADChat("Loading texture for " << o->Kind() << ": " << tex);
 		if (!(map->TexDir->EntryExists(tex) || map->TexDir->DirectoryExists(tex))) {
-			Kthura::Throw("Texture \"" + tex + "\" not found!");
+			Kthura::Throw("Texture \"" + tex + "\" (for " + o->Kind() + ") not found!");
 			return nullptr;
 		}
 		TexMap[o->Kind()][tex] = TQSG_LoadAutoImage(map->TexDir, tex);
