@@ -1,3 +1,6 @@
+Discontinued. 
+Kthura_Slyvina is the currently maintained version of Kthura.
+
 # Kthura for C++
 
 ![Kthura](https://raw.githubusercontent.com/TrickyGameTools/KthuraTextEditor/master/Properties/Kthura.png)
